@@ -8,11 +8,10 @@ import hands from "./views/hands.js";
 import hand from "./views/hand.js";
 import records from "./views/records.js";
 import rivalries from "./views/rivalries.js";
-import bank from "./views/bank.js";
 
 const app = document.getElementById("app");
 const ROUTES = {
-  "": home, leaderboard, sessions, session, members, member, hands, hand, "hall-of-fame": records, rivalries, bank,
+  "": home, leaderboard, sessions, session, members, member, hands, hand, "hall-of-fame": records, rivalries,
   // links from the first version of the site
   games: sessions, game: session, players: members, player: member,
 };
@@ -63,6 +62,8 @@ fetch("data/stats.json").then(r => {
 }).then(d => {
   state.data = d;
   document.getElementById("private-pill").hidden = !d.private;
+  // the banker's book is local only: it exists in the private view (serve_private.py), not on the public site
+  if (d.private) ROUTES.bank = (...a) => import("./views/bank.js").then(m => m.default(...a));
   const updated = new Date(d.generated_at).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
   document.getElementById("footer-meta").textContent = `${d.games.length} sessions · updated ${updated} IST`;
   window.addEventListener("hashchange", route);

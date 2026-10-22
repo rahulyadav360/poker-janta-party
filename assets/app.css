@@ -641,3 +641,7 @@ a.pot { text-decoration: none; }
   background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-weight: 600; box-shadow: var(--shadow); }
 button.link-more { background: none; border: 0; padding: 0; cursor: pointer; font: inherit; font-size: var(--step--1); font-weight: 600; color: var(--marigold); }
 button.link-more.neg { color: var(--neg); }
+.bank-alert { margin-top: 16px; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--neg);
+  background: color-mix(in srgb, var(--neg) 10%, transparent); display: grid; gap: 6px; font-size: 14px; }
+.bank-alert ul { margin: 0; padding-left: 18px; }
+.bank-integrity { margin-top: 16px; }
