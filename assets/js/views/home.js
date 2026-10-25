@@ -1,4 +1,4 @@
-import { state, esc, num, signed, cls, plural, dur, name, dateLabel, avatar, personLink, movement, form, board, cards, medal } from "../ui.js";
+import { state, esc, num, signed, cls, plural, dur, name, dateLabel, avatar, personLink, movement, form, board, cards, medal, liveBadge, updatedLabel } from "../ui.js";
 import { sparkline } from "../charts.js";
 import { recordCard } from "./records.js";
 import { podium, leaderTable } from "./leaderboard.js";
@@ -31,7 +31,7 @@ export default function home(app) {
         </div>
       </div>
       <a class="result-card" href="#/session/${latest.game_id}" style="text-decoration:none">
-        <span class="eyebrow"><span class="live-dot"></span>Results declared · ${dateLabel(latest.date)}</span>
+        <span class="eyebrow"><span class="live-dot"></span>${latest.live ? `Counting in progress · ${updatedLabel(latest)}` : `Results declared · ${dateLabel(latest.date)}`}</span>
         <div class="winner-line">${avatar(latest.players[0].key, 52)}
           <div><div class="who">${esc(name(latest.players[0].key))}</div><div class="amt">${signed(latest.players[0].ledger.net)} chips</div></div>
         </div>
@@ -41,7 +41,7 @@ export default function home(app) {
           <div class="result-row"><span class="r">⋯</span><span class="n" style="color:rgba(255,255,255,.5);font-weight:500">${latest.players.length - 5} more</span><span></span></div>
           ${bottom.map((p, i) => row(p, i, latest.players.length - 1 + i)).join("")}`}
         </div>
-        <div class="foot"><span>${num(latest.hands)} hands · ${dur(latest.duration_min)} · ${latest.player_count} players</span><span>Full results →</span></div>
+        <div class="foot"><span>${num(latest.hands)} hands · ${dur(latest.duration_min)} · ${latest.player_count} players</span><span>${latest.live ? "Live results →" : "Full results →"}</span></div>
       </a>
     </section>
 
@@ -107,12 +107,12 @@ const AWARD_MARKS = { cm: "CM", landslide: "LS", votes: "VB", comeback: "CK", fi
 export function sessionCard(g) {
   const w = g.players[0], l = g.players[g.players.length - 1];
   return `<a class="member-card" href="#/session/${g.game_id}">
-    <div><span class="eyebrow">${num(g.hands)} hands · ${dur(g.duration_min)}</span>
+    <div><span class="eyebrow">${liveBadge(g)}${num(g.hands)} hands · ${dur(g.duration_min)}</span>
     <div style="font:600 var(--step-1)/1.25 var(--font-display);margin-top:6px">${dateLabel(g.date)}</div></div>
     <div class="spark" id="spark-${g.game_id}" title="${esc(name(w.key))}'s running net"></div>
     <div class="nums">
-      <div><span class="k">Winner</span><span class="v">${esc(name(w.key))}</span></div>
-      <div><span class="k">Won</span><span class="v pos">${signed(w.ledger.net)}</span></div>
+      <div><span class="k">${g.live ? "Leading" : "Winner"}</span><span class="v">${esc(name(w.key))}</span></div>
+      <div><span class="k">${g.live ? "Up" : "Won"}</span><span class="v pos">${signed(w.ledger.net)}</span></div>
       <div><span class="k">Players</span><span class="v">${g.player_count}</span></div>
     </div>
     <div class="dim" style="font-size:13px">Bottom: ${esc(name(l.key))} <span class="neg">${signed(l.ledger.net)}</span> · biggest pot ${num(g.biggest_pots[0].pot)}</div>

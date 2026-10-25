@@ -261,6 +261,11 @@ main { padding-block: 28px 80px; min-height: 70vh; }
 }
 .result-card .eyebrow { color: #ffd38a; display: flex; align-items: center; gap: 8px; }
 .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #ffd38a; box-shadow: 0 0 0 0 rgba(255, 211, 138, 0.6); animation: pulse 2s infinite; }
+.live-badge { display: inline-flex; align-items: center; gap: 6px; margin-right: 8px; padding: 3px 8px 3px 7px; border-radius: 999px;
+  background: color-mix(in srgb, var(--neg) 16%, transparent); color: var(--neg); font-weight: 700; letter-spacing: .06em; vertical-align: 1px; }
+.live-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: blink 1.6s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { .live-badge .dot { animation: none; } }
 @keyframes pulse { 70% { box-shadow: 0 0 0 10px rgba(255, 211, 138, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 211, 138, 0); } }
 .result-card h3 { font: 600 var(--step-1)/1.2 var(--font-display); color: #fff; }
 .winner-line { display: flex; align-items: center; gap: 14px; }

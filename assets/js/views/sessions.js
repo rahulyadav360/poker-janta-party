@@ -1,4 +1,4 @@
-import { state, esc, num, signed, cls, pct, plural, dur, name, game, dateLabel, timeLabel, avatar, personLink, sortableTable, STAT_HELP, board, cards } from "../ui.js";
+import { state, esc, num, signed, cls, pct, plural, dur, name, game, dateLabel, timeLabel, avatar, personLink, sortableTable, STAT_HELP, board, cards, liveBadge, updatedLabel } from "../ui.js";
 import { divergingBars, lines, sparkline } from "../charts.js";
 import { awardCard, sessionCard } from "./home.js";
 import { notFound } from "../main.js";
@@ -48,9 +48,9 @@ export function session(app, id) {
     <nav class="crumbs" aria-label="Breadcrumb"><a href="#/sessions">Sessions</a><span>/</span><span>${dateLabel(g.date)}</span></nav>
     <header class="page-head split-head">
       <div style="display:grid;gap:8px">
-        <span class="eyebrow">Session report · ${timeLabel(g.start)} to ${timeLabel(g.end)} IST</span>
+        <span class="eyebrow">${g.live ? `${liveBadge(g)}Started ${timeLabel(g.start)} IST · ${updatedLabel(g)} · refreshes by itself` : `Session report · ${timeLabel(g.start)} to ${timeLabel(g.end)} IST`}</span>
         <h1>${dateLabel(g.date)}</h1>
-        <p class="lede">${num(g.hands)} hands of no-limit hold'em at ${esc(g.blinds.join(", "))} over ${dur(g.duration_min)}. ${esc(name(w.key))} took the night with ${signed(w.ledger.net)}.</p>
+        <p class="lede">${num(g.hands)} hands of no-limit hold'em at ${esc(g.blinds.join(", "))} over ${dur(g.duration_min)}. ${esc(name(w.key))} ${g.live ? "leads so far with" : "took the night with"} ${signed(w.ledger.net)}.</p>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <a class="btn" href="#/hands/${g.game_id}">Browse all hands</a>

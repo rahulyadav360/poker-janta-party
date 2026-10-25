@@ -19,6 +19,9 @@ export function dateLabel(d, { year = true, weekday = true } = {}) {
   });
 }
 export const timeLabel = iso => iso.slice(11, 16);
+// a session still being played (live_update.py): "Live" pill and the time of the last update
+export const liveBadge = g => g.live ? `<span class="live-badge"><span class="dot"></span>Live</span>` : "";
+export const updatedLabel = g => `updated ${clock(Date.parse(g.updated_at))} IST`;
 export const clock = ms => new Date(ms).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Kolkata" });
 
 // ---------- people ----------
@@ -124,7 +127,8 @@ export const STAT_HELP = {
 
 export async function loadHands(gid) {
   if (!state.hands[gid]) {
-    const r = await fetch(`data/hands/${gid}.json`);
+    // the version stops a cached copy from hiding new hands while a session is live
+    const r = await fetch(`data/hands/${gid}.json?v=${encodeURIComponent(state.data.generated_at)}`);
     if (!r.ok) throw new Error(`Couldn't load hands for this session (HTTP ${r.status}).`);
     state.hands[gid] = await r.json();
   }
