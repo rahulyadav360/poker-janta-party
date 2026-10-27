@@ -1,12 +1,15 @@
-# Finds our PokerNow tables every hour and publishes them. While a table is being played it
-# republishes every 5 minutes; an hour after the last hand it checks the game and publishes the
-# final results. Code and game data live in the private repo rahulyadav360/poker-data.
+# Finds our PokerNow tables and publishes them: every 10 minutes in the evening (17:30 to 03:30
+# IST), hourly otherwise. A new table you own gets the host assistant straight away (join and
+# rebuy requests by the house rules, table chat kept). While a table is being played the site is
+# republished every 5 minutes; an hour after the last hand the game is checked and the final
+# results published. Code and game data live in the private repo rahulyadav360/poker-data.
 # Start it by hand (Actions > Update results > Run workflow) to follow a table right away.
 name: Update results
 
 on:
   schedule:
     - cron: "7 * * * *"
+    - cron: "*/10 12-21 * * *"   # UTC: 17:30 to 03:30 IST
   workflow_dispatch:
     inputs:
       game:
@@ -48,6 +51,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Install the socket client (host assistant)
+        run: pip install --quiet "python-socketio[client]==5.11.4" websocket-client==1.8.0
 
       - name: Follow and publish
         working-directory: data
