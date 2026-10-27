@@ -1,4 +1,4 @@
-import { state, esc, num, signed, cls, plural, dur, name, dateLabel, avatar, personLink, movement, form, board, cards, medal, liveBadge, updatedLabel } from "../ui.js";
+import { state, esc, num, signed, cls, plural, dur, name, dateLabel, avatar, personLink, movement, form, board, cards, medal, liveBadge, updatedLabel, unlockItem, badBeatItem } from "../ui.js";
 import { sparkline } from "../charts.js";
 import { recordCard } from "./records.js";
 import { podium, leaderTable } from "./leaderboard.js";
@@ -51,6 +51,7 @@ export default function home(app) {
       <div><div class="k">Members</div><div class="v">${P.length}</div><div class="s">${P.filter(p => p.games_played === G.length).length} at every session</div></div>
       <div><div class="k">Chips bought in</div><div class="v">${num(pot)}</div><div class="s">${plural(G.reduce((s, g) => s + g.rebuys, 0), "rebuy")}</div></div>
       <div><div class="k">Biggest pot</div><div class="v">${num(Math.max(...G.map(g => g.biggest_pots[0].pot)))}</div><div class="s">all-time</div></div>
+      <a href="#/honours" style="text-decoration:none;color:inherit"><div class="k">Bad beats</div><div class="v">${num(D.bad_beats.length)}</div><div class="s">${latest.bad_beat_count ? `${latest.bad_beat_count} ${latest.live ? "so far tonight" : "last session"}` : "and counting"}</div></a>
     </div>
 
     <section class="section">
@@ -63,6 +64,17 @@ export default function home(app) {
       <div class="section-head"><div><span class="eyebrow">${dateLabel(latest.date)}</span><h2>Party awards</h2></div><a class="link-more" href="#/session/${latest.game_id}">Session report →</a></div>
       <div class="awards">${latest.awards.map(awardCard(latest)).join("")}</div>
     </section>
+
+    ${latest.unlocks.length || latest.bad_beat ? `<section class="section split">
+      <div>
+        <div class="section-head"><div><span class="eyebrow">${latest.live ? "Tonight so far" : dateLabel(latest.date)}</span><h2>Badges unlocked</h2></div><a class="link-more" href="#/honours">All honours →</a></div>
+        <div class="unlocks">${latest.unlocks.length ? latest.unlocks.slice(0, 6).map(u => unlockItem(u)).join("") : '<p class="note">None this session.</p>'}</div>
+      </div>
+      <div>
+        <div class="section-head"><div><span class="eyebrow">Bad beat of the night</span><h2>${latest.bad_beat ? `${Math.round(latest.bad_beat.equity * 100)}% and still lost` : "No bad beats"}</h2></div></div>
+        ${latest.bad_beat ? `<ul class="pots">${badBeatItem(latest.bad_beat, { date: false })}</ul>` : '<p class="note">Nobody lost a big pot as a big favourite this session.</p>'}
+      </div>
+    </section>` : ""}
 
     <section class="section split">
       <div>
@@ -102,7 +114,8 @@ export const awardCard = g => a => `
     <div class="who">${avatar(a.key, 26)}<span class="nm">${esc(name(a.key))}</span></div>
     <span class="v">${esc(a.value)}</span>
   </a>`;
-const AWARD_MARKS = { cm: "CM", landslide: "LS", votes: "VB", comeback: "CK", fire: "FB", populist: "PP", hawk: "FH" };
+const AWARD_MARKS = { cm: "CM", landslide: "LS", votes: "VB", comeback: "CK", fire: "FB", populist: "PP", hawk: "FH",
+  donation: "DD", station: "CS", lucky: "LU", martyr: "MR", badbeat: "BB" };
 
 export function sessionCard(g) {
   const w = g.players[0], l = g.players[g.players.length - 1];

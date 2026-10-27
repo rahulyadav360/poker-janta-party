@@ -1,4 +1,4 @@
-import { state, esc, num, signed, cls, pct, plural, name, player, dateLabel, avatar, personLink, movement, form, sortableTable, STAT_HELP, cards, board } from "../ui.js";
+import { state, esc, num, signed, cls, pct, plural, name, player, dateLabel, avatar, personLink, movement, form, sortableTable, STAT_HELP, cards, board, badge, badgeTitle, badBeatItem } from "../ui.js";
 import { divergingBars, lines, sparkline } from "../charts.js";
 import { styleScatter, styleTag } from "./leaderboard.js";
 import { notFound } from "../main.js";
@@ -98,6 +98,44 @@ function handGrid(counts) {
     <div class="heat-legend">Fewer <i style="background:var(--heat-1)"></i><i style="background:var(--heat-2)"></i><i style="background:var(--heat-3)"></i> More · pairs on the diagonal, suited above, offsuit below</div>`;
 }
 
+// trophy cabinet: badges held, the next rung on each ladder, luck and rating
+function cabinet(p) {
+  const D = state.data;
+  const held = p.badges;
+  const ladders = Object.entries(D.badges).filter(([, b]) => b.kind === "tiered").map(([id, b]) => {
+    const v = p.progress[id] ?? 0;
+    const next = b.tiers.find(t => v < t);
+    const tier = b.tiers.filter(t => v >= t).length - 1;
+    return { id, b, v, next, tier };
+  }).filter(x => x.next != null).sort((a, b) => b.v / b.next - a.v / a.next).slice(0, 5);
+  const L = p.luck, st = p.streaks;
+  const mine = D.bad_beats.filter(b => b.victim === p.key).sort((a, b) => b.pot - a.pot)[0];
+  return `<section class="section grid-2">
+    <div class="panel">
+      <div class="panel-head"><h2>Trophy cabinet</h2><span class="note">${plural(held.length, "badge")} of ${Object.keys(D.badges).length}</span></div>
+      ${held.length ? `<div class="cabinet">${held.map(u => `<a class="trophy" href="${u.hand ? `#/hand/${u.game_id}/${u.hand}` : `#/session/${u.game_id}`}" title="${esc(D.badges[u.badge].blurb)}">
+        ${badge(u.badge, u.tier, { size: 48, title: false })}<span class="t">${esc(badgeTitle(u))}</span><span class="d">${dateLabel(u.date, { year: false, weekday: false })}${u.times > 1 ? ` · ×${u.times}` : ""}</span></a>`).join("")}</div>`
+        : '<p class="note">No badges yet. The first winning session earns Maiden Victory.</p>'}
+      ${ladders.length ? `<h3 class="sub-h">Next up</h3><div class="vs">${ladders.map(x => `<div class="vs-row">
+        <span class="lbl">${esc(x.b.title)}<small>${x.tier >= 0 ? D.tier_names[x.tier] + " → " : ""}${D.tier_names[x.tier + 1]} at ${num(x.next)}</small></span>
+        <span class="vs-track"><span class="vs-fill" style="width:${Math.min(100, (100 * x.v) / x.next)}%"></span></span>
+        <span class="val">${num(x.v)}</span></div>`).join("")}</div>` : ""}
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Luck and form</h2><a class="link-more" href="#/honours">Honours →</a></div>
+      <div class="mini-stats">
+        <div><span class="k">Rating</span><span class="v">${num(p.rating)}</span><span class="s ${cls(p.rating_change)}">${p.rating_change != null ? signed(p.rating_change) + " last session" : ""}</span></div>
+        <div><span class="k">Luck</span><span class="v ${cls(L.chips)}">${signed(Math.round(L.chips))}</span><span class="s">over ${plural(L.hands, "showdown")}</span></div>
+        <div><span class="k">Luck-adjusted net</span><span class="v ${cls(L.adjusted_net)}">${signed(Math.round(L.adjusted_net))}</span><span class="s">actual ${signed(p.net)}</span></div>
+        <div><span class="k">Bad beats</span><span class="v">${L.beats_suffered} <small class="dim">/ ${L.beats_dealt}</small></span><span class="s">suffered / dealt out${L.lost_to_beats ? ` · ${num(L.lost_to_beats)} lost` : ""}</span></div>
+        ${st ? `<div><span class="k">Streak now</span><span class="v">${st.current.win ? `${st.current.win} up` : st.current.lose ? `${st.current.lose} down` : "–"}</span><span class="s">best run ${plural(st.best.win, "session")} up</span></div>
+        <div><span class="k">Attendance</span><span class="v">${st.current.attend}</span><span class="s">in a row · best ${st.best.attend}</span></div>` : ""}
+      </div>
+      ${mine ? `<h3 class="sub-h">Worst beat</h3><ul class="pots">${badBeatItem(mine)}</ul>` : ""}
+    </div>
+  </section>`;
+}
+
 function handLine(h, label) {
   if (!h) return "";
   return `<a class="pot hand-line" href="#/hand/${h.game_id}/${h.hand}">
@@ -138,6 +176,8 @@ export function member(app, key) {
       <div><div class="k">Buy-ins</div><div class="v">${num(p.buy_in)}</div><div class="s">${plural(p.rebuys, "rebuy")}</div></div>
       <div><div class="k">Best session</div><div class="v ${cls(p.best_game.net)}">${signed(p.best_game.net)}</div><div class="s">${dateLabel(p.best_game.date, { year: false })}</div></div>
     </div>
+
+    ${cabinet(p)}
 
     <section class="section grid-2">
       <div class="panel style-card">

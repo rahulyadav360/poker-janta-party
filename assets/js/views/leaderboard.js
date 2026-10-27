@@ -27,6 +27,8 @@ export function leaderTable(holder, rows, { compact = false } = {}) {
       { key: "af", label: "AF", title: STAT_HELP.af, fmt: r => num(r.stats.af), sort: r => r.stats.af },
       { key: "wsd", label: "W$SD", title: STAT_HELP.wsd, fmt: r => pct(r.stats.wsd), sort: r => r.stats.wsd },
       { key: "style", label: "Style", left: true, fmt: r => styleTag(r), sort: r => r.style.label },
+      { key: "rating", label: "Rating", title: "Party rating: everyone compared with everyone at each session, starting at 1500", fmt: r => num(r.rating), sort: r => r.rating },
+      { key: "adj", label: "Luck-adj.", title: "Net with luck in heads-up showdowns taken out (see Honours)", fmt: r => signed(Math.round(r.luck.adjusted_net)), cls: r => cls(r.luck.adjusted_net), sort: r => r.luck.adjusted_net },
     ]),
     { key: "form", label: "Form", fmt: r => form(r.form) },
   ];

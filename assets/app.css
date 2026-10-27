@@ -47,6 +47,12 @@
   --step-2: 1.5rem;
   --step-3: 2.125rem;
   --step-4: clamp(2.25rem, 5vw, 3.75rem);
+  /* badges: ladder tiers and the lighter "shame" badges, the same in both themes */
+  --tier-0: #c27c46;
+  --tier-1: #b9c3c9;
+  --tier-2: #f2a93b;
+  --shame: #8c4a52;
+  --shame-ink: #fbe9ea;
   --radius: 14px;
   --radius-sm: 8px;
   --gutter: 16px;
@@ -227,7 +233,7 @@ main { padding-block: 28px 80px; min-height: 70vh; }
   display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); overflow: hidden;
 }
-.strip > div { padding: 14px 18px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); margin: 0 -1px -1px 0; }
+.strip > div, .strip > a { padding: 14px 18px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); margin: 0 -1px -1px 0; }
 .strip .k { font-size: var(--step--1); color: var(--muted); }
 .strip .v { font: 600 var(--step-2)/1.15 var(--font-display); letter-spacing: -0.02em; margin-top: 4px; }
 .strip .s { font-size: 12px; color: var(--muted); margin-top: 2px; }
@@ -658,3 +664,52 @@ button.link-more.neg { color: var(--neg); }
 .flow-chip.out { border-left-color: var(--marigold); }
 .flow-chip.p2p { border-left-color: var(--series-1); }
 .flow-chip.adj { border-left-color: var(--neg); }
+
+/* ---------- honours ---------- */
+.badge-svg { flex: none; display: block; }
+.unlocks { display: grid; gap: 4px; }
+.unlock {
+  display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center;
+  padding: 8px 10px; margin-inline: -10px; border-radius: var(--radius-sm); text-decoration: none; color: inherit;
+}
+.unlock:hover { background: var(--raised); }
+.unlock .txt { display: grid; gap: 2px; min-width: 0; }
+.unlock .t { font-weight: 650; }
+.unlock .b { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.unlock .when { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 480px) { .unlock { grid-template-columns: 40px minmax(0, 1fr); } .unlock .when { grid-column: 2; } }
+.titles { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); }
+.title-card .holder { gap: 10px; }
+.badge-book { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.book-entry {
+  display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 14px; align-items: start; padding: 16px;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface);
+}
+.book-entry.locked .t { color: var(--ink-2); }
+.book-entry .txt { display: grid; gap: 6px; min-width: 0; }
+.book-entry .t { font: 600 var(--step-0)/1.25 var(--font-display); }
+.book-entry .b { font-size: 13px; color: var(--muted); }
+.book-entry .tiers { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.book-entry .tiers span { display: inline-flex; align-items: center; gap: 4px; }
+.book-entry .who { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+.book-entry .who a { text-decoration: none; }
+.cabinet { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+.trophy {
+  display: grid; justify-items: center; gap: 4px; padding: 10px 6px; border-radius: var(--radius-sm);
+  text-align: center; text-decoration: none; color: inherit;
+}
+.trophy:hover { background: var(--raised); }
+.trophy .t { font-size: 12px; font-weight: 650; line-height: 1.25; }
+.trophy .d { font-size: 11px; color: var(--muted); }
+.sub-h { font: 600 var(--step-0)/1.2 var(--font-display); margin: 20px 0 12px; }
+.mini-stats { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); }
+.mini-stats > div { display: grid; gap: 2px; padding: 12px; border-radius: var(--radius-sm); background: var(--raised); }
+.mini-stats .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.mini-stats .v { font: 600 var(--step-1)/1.2 var(--font-display); font-variant-numeric: tabular-nums; }
+.mini-stats .s { font-size: 12px; color: var(--muted); }
+.mini-stats .s.pos { color: var(--pos); }
+.mini-stats .s.neg { color: var(--neg); }
+.seat .peq {
+  font: 700 11px/1 var(--font-mono); color: var(--marigold-ink); background: var(--marigold);
+  padding: 3px 6px; border-radius: 999px; margin-top: 2px; font-variant-numeric: tabular-nums;
+}

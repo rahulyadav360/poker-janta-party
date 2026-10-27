@@ -1,4 +1,5 @@
-import { state, esc, num, signed, cls, pct, plural, dur, name, game, dateLabel, timeLabel, avatar, personLink, sortableTable, STAT_HELP, board, cards, liveBadge, updatedLabel } from "../ui.js";
+import { state, esc, num, signed, cls, pct, plural, dur, name, game, dateLabel, timeLabel, avatar, personLink, sortableTable, STAT_HELP, board, cards, liveBadge, updatedLabel, unlockItem, badBeatItem } from "../ui.js";
+import { shareRecap } from "../recap.js";
 import { divergingBars, lines, sparkline } from "../charts.js";
 import { awardCard, sessionCard } from "./home.js";
 import { notFound } from "../main.js";
@@ -53,6 +54,7 @@ export function session(app, id) {
         <p class="lede">${num(g.hands)} hands of no-limit hold'em at ${esc(g.blinds.join(", "))} over ${dur(g.duration_min)}. ${esc(name(w.key))} ${g.live ? "leads so far with" : "took the night with"} ${signed(w.ledger.net)}.</p>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn primary" id="share-recap" type="button">Share recap</button>
         <a class="btn" href="#/hands/${g.game_id}">Browse all hands</a>
         <a class="btn" href="${g.url}" target="_blank" rel="noopener">PokerNow table ↗</a>
       </div>
@@ -69,6 +71,17 @@ export function session(app, id) {
     <section class="section">
       <div class="section-head"><div><span class="eyebrow">Party awards</span><h2>Who stood out</h2></div></div>
       <div class="awards">${g.awards.map(awardCard(g)).join("")}</div>
+    </section>
+
+    <section class="section grid-2">
+      <div class="panel">
+        <div class="panel-head"><h2>Badges unlocked</h2><a class="link-more" href="#/honours">Badge book →</a></div>
+        <div class="unlocks">${g.unlocks.length ? g.unlocks.map(u => unlockItem(u)).join("") : '<p class="note">No new badges this session.</p>'}</div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Bad beats</h2><span class="note">${plural(g.bad_beat_count, "beat")}</span></div>
+        ${g.bad_beat_count ? `<ul class="pots">${state.data.bad_beats.filter(b => b.game_id === g.game_id).sort((a, b) => b.pot - a.pot).map(b => badBeatItem(b, { date: false })).join("")}</ul>` : '<p class="note">Nobody lost a big pot as a big favourite this session.</p>'}
+      </div>
     </section>
 
     <section class="panel section">
@@ -97,6 +110,8 @@ export function session(app, id) {
       ${newer ? `<a class="btn" href="#/session/${newer.game_id}">${dateLabel(newer.date)} →</a>` : ""}
     </nav>
   `;
+
+  document.getElementById("share-recap").addEventListener("click", e => shareRecap(g, e.currentTarget));
 
   const keys = Object.keys(g.timeline.series);
   const finalOf = k => { const v = g.timeline.series[k]; for (let i = v.length - 1; i >= 0; i--) if (v[i] != null) return v[i]; return 0; };

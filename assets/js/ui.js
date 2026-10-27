@@ -139,3 +139,48 @@ export function medal(kind) {
   // a rosette in the party colour; the ribbon tails mark it as an award
   return `<svg class="medal" viewBox="0 0 40 40" aria-hidden="true"><path d="M13 24 9 37l6-3 4 5 3-13M27 24l4 13-6-3-4 5-3-13" fill="var(--line-strong)"/><circle cx="20" cy="17" r="13" fill="var(--marigold)"/><circle cx="20" cy="17" r="9" fill="none" stroke="var(--marigold-ink)" stroke-width="1.5" stroke-dasharray="2 2.4"/><text x="20" y="21.5" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="11" fill="var(--marigold-ink)">${kind}</text></svg>`;
 }
+
+// ---------- honours: badges, unlocks, bad beats ----------
+// One shape per kind so a badge reads without colour: a rosette for feats, a hexagon for
+// ladders (bronze, silver, gold), a tilted square for the lighter "shame" badges.
+export function badge(id, tier = null, { size = 44, locked = false, title = true } = {}) {
+  const b = state.data.badges[id];
+  if (!b) return "";
+  const tierName = tier != null ? state.data.tier_names[tier] : "";
+  const fill = locked ? "none" : b.kind === "tiered" ? `var(--tier-${tier ?? 0})` : b.kind === "shame" ? "var(--shame)" : "var(--marigold)";
+  const ink = locked ? "var(--muted)" : b.kind === "shame" ? "var(--shame-ink)" : "var(--marigold-ink)";
+  const stroke = locked ? `stroke="var(--line-strong)" stroke-width="1.5" stroke-dasharray="3 3"` : "";
+  const shape = b.kind === "tiered"
+    ? `<path d="M20 2 36 11v18L20 38 4 29V11z" fill="${fill}" ${stroke}/><path d="M20 7 31.5 13.5v13L20 33 8.5 26.5v-13z" fill="none" stroke="${ink}" stroke-opacity=".35" stroke-width="1.2"/>`
+    : b.kind === "shame"
+      ? `<rect x="7" y="7" width="26" height="26" rx="5" transform="rotate(45 20 20)" fill="${fill}" ${stroke}/>`
+      : `<path d="M13 26 10 38l5-3 4 4 2-10M27 26l3 12-5-3-4 4-2-10" fill="${locked ? "none" : "var(--line-strong)"}"/><circle cx="20" cy="18" r="14" fill="${fill}" ${stroke}/><circle cx="20" cy="18" r="10" fill="none" stroke="${ink}" stroke-opacity=".45" stroke-width="1.2" stroke-dasharray="2 2.4"/>`;
+  const label = `${b.title}${tierName ? " · " + tierName : ""}: ${b.blurb}`;
+  return `<svg class="badge-svg" viewBox="0 0 40 40" width="${size}" height="${size}" role="img" aria-label="${esc(label)}">${title ? `<title>${esc(label)}</title>` : ""}${shape}<text x="20" y="${b.kind === "once" ? 22 : 24}" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="10" fill="${ink}">${esc(b.mark)}</text></svg>`;
+}
+export const badgeTitle = u => {
+  const b = state.data.badges[u.badge];
+  return b.title + (u.tier != null ? ` · ${state.data.tier_names[u.tier]}` : "");
+};
+// one line per unlock: badge, who, what, where
+export function unlockItem(u, { who = true } = {}) {
+  const b = state.data.badges[u.badge];
+  const href = u.hand ? `#/hand/${u.game_id}/${u.hand}` : `#/session/${u.game_id}`;
+  return `<a class="unlock" href="${href}">
+    ${badge(u.badge, u.tier, { size: 40, title: false })}
+    <span class="txt"><span class="t">${esc(badgeTitle(u))}</span><span class="b">${who ? `${esc(name(u.key))} · ` : ""}${esc(b.blurb)}</span></span>
+    <span class="when">${dateLabel(u.date, { year: false, weekday: false })}${u.hand ? ` · #${u.hand}` : ""}${u.times > 1 ? ` · ×${u.times}` : ""}</span>
+  </a>`;
+}
+export const eqPct = v => v == null ? "–" : `${Math.round(v * 100)}%`;
+export function badBeatItem(b, { date = true } = {}) {
+  return `<li class="pot beat">
+    <div class="size">${num(b.pot)}<small>${date ? dateLabel(b.date, { year: false, weekday: false }) + " · " : ""}#${b.hand}</small></div>
+    <div class="body">
+      <div class="line">${personLink(b.victim, 22)} ${cards(b.victim_cards)} <span class="tag accent">${eqPct(b.equity)} on the ${esc(b.street)}</span></div>
+      <div class="line"><span class="dim">lost to</span> ${personLink(b.winner, 22)} ${cards(b.winner_cards)} ${b.winner_desc ? `<span class="dim">${esc(b.winner_desc)}</span>` : ""}</div>
+      <div class="line">${board(b.board)}</div>
+    </div>
+    <a class="btn" href="#/hand/${b.game_id}/${b.hand}" aria-label="Replay hand ${b.hand}">▶ Replay</a>
+  </li>`;
+}

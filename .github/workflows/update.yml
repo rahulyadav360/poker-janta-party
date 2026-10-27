@@ -1,0 +1,57 @@
+# Finds our PokerNow tables every hour and publishes them. While a table is being played it
+# republishes every 5 minutes; an hour after the last hand it checks the game and publishes the
+# final results. Code and game data live in the private repo rahulyadav360/poker-data.
+# Start it by hand (Actions > Update results > Run workflow) to follow a table right away.
+name: Update results
+
+on:
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch:
+    inputs:
+      game:
+        description: "PokerNow game link (optional: follow this table now)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write   # push the rebuilt site to this repo
+  pages: write      # ask GitHub Pages to rebuild
+
+concurrency:
+  group: poker-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@v4
+        with:
+          path: site-repo
+
+      - name: Check out the data (private)
+        uses: actions/checkout@v4
+        with:
+          repository: rahulyadav360/poker-data
+          ssh-key: ${{ secrets.DATA_DEPLOY_KEY }}
+          path: data
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Follow and publish
+        working-directory: data
+        env:
+          POKERNOW_COOKIE: ${{ secrets.POKERNOW_COOKIE }}
+          GH_TOKEN: ${{ github.token }}
+          GAME: ${{ inputs.game }}
+        run: |
+          for repo in . ../site-repo; do
+            git -C "$repo" config user.name "poker-janta-party bot"
+            git -C "$repo" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          done
+          python scripts/cloud_update.py --site ../site-repo ${GAME:+"$GAME"}

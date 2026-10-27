@@ -8,10 +8,11 @@ import hands from "./views/hands.js";
 import hand from "./views/hand.js";
 import records from "./views/records.js";
 import rivalries from "./views/rivalries.js";
+import honours from "./views/honours.js";
 
 const app = document.getElementById("app");
 const ROUTES = {
-  "": home, leaderboard, sessions, session, members, member, hands, hand, "hall-of-fame": records, rivalries,
+  "": home, leaderboard, sessions, session, members, member, hands, hand, "hall-of-fame": records, rivalries, honours, badges: honours,
   // links from the first version of the site
   games: sessions, game: session, players: members, player: member,
 };

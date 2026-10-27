@@ -1,4 +1,4 @@
-import { state, esc, num, signed, cls, name, game, dateLabel, clock, avatar, personLink, card, cards, backs, loadHands } from "../ui.js";
+import { state, esc, num, signed, cls, name, game, dateLabel, clock, avatar, personLink, card, cards, backs, loadHands, eqPct } from "../ui.js";
 import { notFound } from "../main.js";
 
 const STREET = ["Preflop", "Flop", "Turn", "River"];
@@ -27,6 +27,7 @@ export default async function hand(app, gid, n) {
   const slots = 10;
   const slotOf = s => ((s.seat - anchor.seat) % slots + slots) % slots;
   const winners = h.seats.filter(s => s.net > 0);
+  const beat = state.data.bad_beats.find(b => b.game_id === gid && b.hand === h.n);
 
   app.innerHTML = `
     <nav class="crumbs" aria-label="Breadcrumb"><a href="#/sessions">Sessions</a><span>/</span><a href="#/session/${gid}">${dateLabel(g.date)}</a><span>/</span><a href="#/hands/${gid}">Hands</a><span>/</span><span>#${h.n}</span></nav>
@@ -34,7 +35,8 @@ export default async function hand(app, gid, n) {
       <div style="display:grid;gap:8px">
         <span class="eyebrow">Hand replayer · ${clock(h.t)} IST · blinds ${h.sb}/${h.bb}</span>
         <h1>Hand #${h.n}: ${num(h.pot)} pot</h1>
-        <p class="lede">${h.seats.length} players. ${winners.map(w => `${esc(name(w.k))} won ${num(w.net)} chips`).join(", ")}${h.sd ? " at showdown" : " without a showdown"}.</p>
+        <p class="lede">${h.seats.length} players. ${winners.map(w => `${esc(name(w.k))} won ${num(w.net)} chips`).join(", ")}${h.sd ? " at showdown" : " without a showdown"}.${beat ? ` <span class="tag accent">Bad beat</span> ${esc(name(beat.victim))} was ${eqPct(beat.equity)} to win on the ${esc(beat.street)}.` : ""}</p>
+        ${h.eq ? `<p class="note">The percentage by each player is their chance of winning with the cards still to come, worked out from the cards shown.</p>` : ""}
       </div>
       <label class="toggle"><input type="checkbox" id="reveal" checked> Show known cards from the start</label>
     </header>
@@ -135,10 +137,12 @@ export default async function hand(app, gid, n) {
       const known = reveal ? (x.shown || s.cards) : x.shown;
       const handCards = x.folded ? "" : known ? cards(known) : backs(2);
       const isWin = x.won > 0;
+      const streetIdx = { 0: 0, 3: 1, 4: 2, 5: 3 }[boards[0].length];
+      const eq = h.eq && h.eq[s.k] && known && !x.folded && !boards[1].length ? h.eq[s.k][streetIdx] : null;
       return `
         <div class="seat ${x.folded ? "folded" : ""} ${acting === s.seat ? "acting" : ""} ${isWin ? "winner" : ""}" style="left:${pos.x}%;top:${pos.y}%">
           ${handCards}
-          <div class="plate"><span class="pname">${esc(name(s.k))}</span><span class="pstack">${num(x.stack)}</span>${s.pos ? `<span class="ppos">${s.pos}</span>` : ""}</div>
+          <div class="plate"><span class="pname">${esc(name(s.k))}</span><span class="pstack">${num(x.stack)}</span>${s.pos ? `<span class="ppos">${s.pos}</span>` : ""}${eq != null ? `<span class="peq" title="Chance of winning from here">${eqPct(eq)}</span>` : ""}</div>
           ${x.act ? `<span class="act ${x.folded ? "fold" : ""} ${isWin ? "win" : ""}">${esc(x.act)}</span>` : ""}
         </div>
         ${x.bet > 0 ? `<span class="bet-chip" style="left:${bet.x}%;top:${bet.y}%">${num(x.bet)}</span>` : ""}
