@@ -46,7 +46,8 @@ export default function honours(app) {
 
     <section class="section grid-2">
       <div class="panel">
-        <div class="panel-head"><h2>${esc(season.label)} season</h2><span class="note">${plural(season.sessions, "session")}${season.over ? "" : " so far"}</span></div>
+        <div class="panel-head"><h2>${esc(season.label)} season</h2><a class="link-more" href="#/leaderboard/${season.id}">Season table →</a></div>
+        <p class="note" style="margin-bottom:12px">${plural(season.sessions, "session")}${season.over ? "" : " so far"}. The table resets each month.</p>
         <div id="h-season"></div>
         ${D.seasons.length > 1 ? `<p class="note" style="margin-top:12px">Past champions: ${D.seasons.filter(s => s.champion).map(s => `${esc(s.label)} ${esc(name(s.champion))}`).join(" · ")}</p>` : `<p class="note" style="margin-top:12px">Seasons run by calendar month. The champion is crowned when the month ends.</p>`}
       </div>

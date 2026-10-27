@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Recap</title>
+<meta name="robots" content="noindex">
+<!-- Used by scripts/recaps.py: draws one session's recap full-size for a headless screenshot. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Unbounded:wght@500;600;700;800&display=swap">
+<style>html, body { margin: 0; background: #0b100e; } canvas { display: block; }</style>
+</head>
+<body>
+<script type="module">
+  import { state } from "./assets/js/ui.js";
+  import { draw } from "./assets/js/recap.js";
+  const d = await (await fetch(`data/stats.json?t=${Date.now()}`)).json();
+  state.data = d;
+  const g = d.games.find(x => x.game_id === location.hash.slice(1)) || d.games[0];
+  document.body.appendChild(await draw(g));
+  document.title = "ready";
+</script>
+</body>
+</html>

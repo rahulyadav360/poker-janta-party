@@ -184,3 +184,26 @@ export function badBeatItem(b, { date = true } = {}) {
     <a class="btn" href="#/hand/${b.game_id}/${b.hand}" aria-label="Replay hand ${b.hand}">▶ Replay</a>
   </li>`;
 }
+
+// ---------- player card pieces (member page and its share picture) ----------
+// the badges worth showing off: gold first, then the rarest feats; never the lighter ones
+export function showcase(p, n = 4) {
+  const D = state.data;
+  const holders = id => D.players.filter(x => x.badges.some(u => u.badge === id)).length;
+  return p.badges.filter(u => D.badges[u.badge].kind !== "shame")
+    .sort((a, b) => (b.tier ?? -1) - (a.tier ?? -1) || holders(a.badge) - holders(b.badge)).slice(0, n);
+}
+
+// favourite starting hand among the ones shown, and the best made hand
+export function signature(p) {
+  const fav = Object.entries(p.stats.starting_hands).sort((a, b) => b[1] - a[1])[0];
+  return { fav: fav ? { hand: fav[0], times: fav[1] } : null, best: p.stats.best_hand };
+}
+
+export function rivalsOf(p) {
+  return {
+    nemesis: p.rivals.filter(r => r.net < 0).sort((a, b) => a.net - b.net)[0],
+    victim: p.rivals.filter(r => r.net > 0).sort((a, b) => b.net - a.net)[0],
+  };
+}
+

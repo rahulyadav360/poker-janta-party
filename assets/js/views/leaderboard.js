@@ -1,4 +1,4 @@
-import { state, esc, num, signed, cls, pct, name, avatar, personLink, movement, form, sortableTable, STAT_HELP, dateLabel } from "../ui.js";
+import { state, esc, num, signed, cls, pct, plural, name, player, avatar, personLink, movement, form, sortableTable, STAT_HELP, dateLabel } from "../ui.js";
 import { styleMap, divergingBars } from "../charts.js";
 
 export function podium(top) {
@@ -35,15 +35,71 @@ export function leaderTable(holder, rows, { compact = false } = {}) {
   sortableTable(holder, cols, rows, { sort: { key: "rank", dir: 1 }, onRow: r => { location.hash = `#/member/${encodeURIComponent(r.key)}`; } });
 }
 
-export default function leaderboard(app) {
+// One member's numbers inside a season: only sessions played that month count.
+export function seasonRows(season) {
+  return season.standings.map((s, i) => {
+    const p = player(s.key);
+    const games = p.games.filter(g => g.date.startsWith(season.id));
+    const hands = games.reduce((a, g) => a + g.hands, 0);
+    const bb = hands ? games.reduce((a, g) => a + (g.bb_per_100 || 0) * g.hands, 0) / hands : null;
+    return { ...p, rank: i + 1, net: s.net, games_played: s.sessions, wins: s.wins, movement: null, new: false,
+      form: games.slice(-5).map(g => (g.net > 0 ? "W" : g.net < 0 ? "L" : "E")),
+      stats: { ...p.stats, hands, bb_per_100: bb == null ? null : Math.round(bb * 10) / 10 } };
+  });
+}
+
+function seasonTabs(current) {
+  const S = state.data.seasons;
+  return `<div class="seg" role="tablist" aria-label="Standings for">
+    <a class="${current ? "" : "on"}" href="#/leaderboard" role="tab" aria-selected="${!current}">All time</a>
+    ${S.map(s => `<a class="${current === s.id ? "on" : ""}" href="#/leaderboard/${s.id}" role="tab" aria-selected="${current === s.id}">${esc(s.label)}${s.over ? "" : " · current"}</a>`).join("")}
+  </div>`;
+}
+
+function seasonBoard(app, season) {
+  const rows = seasonRows(season);
+  app.dataset.title = `${season.label} season`;
+  const leader = rows[0];
+  app.innerHTML = `
+    <header class="page-head">
+      <span class="eyebrow">Season · ${dateLabel(season.start, { year: false })} to ${dateLabel(season.end, { year: false })}</span>
+      <h1>${esc(season.label)}</h1>
+      <p class="lede">The table resets every calendar month. ${season.over
+        ? `${esc(leader.name)} finished on top and is the season champion.`
+        : `${esc(leader.name)} leads after ${plural(season.sessions, "session")}. The champion is crowned when the month ends.`}</p>
+    </header>
+    <div class="filters">${seasonTabs(season.id)}</div>
+    ${podium(rows.slice(0, 3))}
+    <section class="panel" style="margin-top:16px">
+      <div class="panel-head"><h2>Season standings</h2><p class="note">Only sessions played in ${esc(season.label)} count.</p></div>
+      <div id="lb-table"></div>
+    </section>`;
+  sortableTable(document.getElementById("lb-table"), [
+    { key: "rank", label: "#", fmt: r => `<span class="rank-cell">${r.rank}</span>`, sort: r => r.rank },
+    { key: "name", label: "Member", left: true, fmt: r => personLink(r.key), sort: r => r.name.toLowerCase() },
+    { key: "net", label: "Net", fmt: r => `<strong>${signed(r.net)}</strong>`, cls: r => cls(r.net), sort: r => r.net },
+    { key: "games", label: "Sessions", fmt: r => r.games_played, sort: r => r.games_played },
+    { key: "wins", label: "Nights won", title: "Sessions finished on top", fmt: r => r.wins, sort: r => r.wins },
+    { key: "hands", label: "Hands", fmt: r => num(r.stats.hands), sort: r => r.stats.hands },
+    { key: "bb100", label: "bb/100", title: STAT_HELP.bb100, fmt: r => signed(r.stats.bb_per_100), cls: r => cls(r.stats.bb_per_100), sort: r => r.stats.bb_per_100 },
+    { key: "form", label: "Form", fmt: r => form(r.form) },
+  ], rows, { sort: { key: "rank", dir: 1 }, onRow: r => { location.hash = `#/member/${encodeURIComponent(r.key)}`; } });
+}
+
+export default function leaderboard(app, seasonId) {
   const D = state.data;
+  if (seasonId) {
+    const season = D.seasons.find(s => s.id === seasonId);
+    if (season) return seasonBoard(app, season);
+  }
   app.dataset.title = "Leaderboard";
   app.innerHTML = `
     <header class="page-head">
       <span class="eyebrow">Seat tally · after ${D.games.length} sessions</span>
       <h1>Leaderboard</h1>
-      <p class="lede">Ranked by net chips across every session, from the PokerNow ledgers. Arrows show movement since the previous session.</p>
+      <p class="lede">Ranked by net chips across every session, from the PokerNow ledgers. Arrows show movement since the previous session. Pick a month for that season's table.</p>
     </header>
+    <div class="filters">${seasonTabs(null)}</div>
     ${podium(D.players.slice(0, 3))}
     <section class="panel" style="margin-top:16px">
       <div class="panel-head"><h2>Standings</h2><p class="note">Click a heading to sort. Hover a stat name for what it means.</p></div>

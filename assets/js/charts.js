@@ -100,12 +100,13 @@ export function divergingBars(container, rows, { format = compact } = {}) {
 
 // Lines. xs: x values; series [{key, label, values (null = absent), color?}]; markers [{i, label}]
 export function lines(container, { xs, series, xLabel = "Hand", xTitle = v => `${xLabel} ${v}`, format = compact,
-  height = 300, markers = [], area = false, onPick } = {}) {
+  height = 300, markers = [], area = false, onPick, zero = true } = {}) {
   responsive(container, (W) => {
     const H = height, m = { l: 46, r: 84, t: 14, b: 30 };
     const svg = el("svg", { class: "chart", viewBox: `0 0 ${W} ${H}`, height: H, role: "img" }, container);
     const all = series.flatMap(s => s.values.filter(v => v != null));
-    let min = Math.min(0, ...all), max = Math.max(0, ...all);
+    // zero: false lets a scale like ratings (around 1500) use its own range
+    let min = zero ? Math.min(0, ...all) : Math.min(...all), max = zero ? Math.max(0, ...all) : Math.max(...all);
     const ticks = niceTicks(min, max, 5);
     min = Math.min(min, ticks[0]); max = Math.max(max, ticks[ticks.length - 1]);
     const n = xs.length;
@@ -113,7 +114,7 @@ export function lines(container, { xs, series, xLabel = "Hand", xTitle = v => `$
     const Y = v => m.t + (1 - (v - min) / (max - min || 1)) * (H - m.t - m.b);
     for (const t of ticks) {
       el("line", { x1: m.l, x2: W - m.r, y1: Y(t), y2: Y(t), class: t === 0 ? "axis" : "grid" }, svg);
-      el("text", { x: m.l - 8, y: Y(t) + 4, "text-anchor": "end" }, svg).textContent = compact(t);
+      el("text", { x: m.l - 8, y: Y(t) + 4, "text-anchor": "end" }, svg).textContent = zero ? compact(t) : format(t);
     }
     if (markers.length) {
       markers.forEach((mk, k) => {

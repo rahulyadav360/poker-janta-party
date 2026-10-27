@@ -1,4 +1,5 @@
-import { state, esc, num, signed, cls, pct, plural, name, player, dateLabel, avatar, personLink, movement, form, sortableTable, STAT_HELP, cards, board, badge, badgeTitle, badBeatItem } from "../ui.js";
+import { state, esc, num, signed, cls, pct, plural, name, player, dateLabel, avatar, personLink, movement, form, sortableTable, STAT_HELP, cards, board, badge, badgeTitle, badBeatItem, showcase, signature, rivalsOf } from "../ui.js";
+import { shareCard } from "../recap.js";
 import { divergingBars, lines, sparkline } from "../charts.js";
 import { styleScatter, styleTag } from "./leaderboard.js";
 import { notFound } from "../main.js";
@@ -98,6 +99,33 @@ function handGrid(counts) {
     <div class="heat-legend">Fewer <i style="background:var(--heat-1)"></i><i style="background:var(--heat-2)"></i><i style="background:var(--heat-3)"></i> More · pairs on the diagonal, suited above, offsuit below</div>`;
 }
 
+const ratingRank = p => [...state.data.players].filter(x => x.rating).sort((a, b) => b.rating - a.rating).findIndex(x => x.key === p.key) + 1;
+
+function playerCard(p) {
+  const sig = signature(p), { nemesis, victim } = rivalsOf(p), show = showcase(p);
+  return `<div class="player-card">
+    <div class="pc-top">${avatar(p.key, 64)}
+      <div style="min-width:0"><div class="pc-name">${esc(p.name)}</div><div class="pc-arch">${esc(p.style.label)}</div></div>
+      <div class="pc-rank"><span>#${p.rank}</span><small>rating ${num(p.rating)}</small></div>
+    </div>
+    <p class="pc-blurb">${esc(p.style.blurb)}</p>
+    <div class="pc-nums">
+      <div><span class="k">Net</span><span class="v ${cls(p.net)}">${signed(p.net)}</span></div>
+      <div><span class="k">Sessions</span><span class="v">${p.games_played}</span></div>
+      <div><span class="k">bb/100</span><span class="v ${cls(p.stats.bb_per_100)}">${signed(p.stats.bb_per_100)}</span></div>
+      <div><span class="k">Hands</span><span class="v">${num(p.stats.hands)}</span></div>
+    </div>
+    <dl class="pc-facts">
+      ${sig.fav ? `<div><dt>Signature hand</dt><dd><strong>${esc(sig.fav.hand)}</strong> <span class="dim">shown ${plural(sig.fav.times, "time")}</span></dd></div>` : ""}
+      ${sig.best ? `<div><dt>Best hand shown</dt><dd>${esc(sig.best.desc)}</dd></div>` : ""}
+      ${nemesis ? `<div><dt>Nemesis</dt><dd>${personLink(nemesis.key, 20)} <span class="neg">${signed(Math.round(nemesis.net))}</span></dd></div>` : ""}
+      ${victim ? `<div><dt>Best customer</dt><dd>${personLink(victim.key, 20)} <span class="pos">${signed(Math.round(victim.net))}</span></dd></div>` : ""}
+    </dl>
+    ${show.length ? `<div class="pc-badges">${show.map(u => `<span title="${esc(badgeTitle(u))}">${badge(u.badge, u.tier, { size: 40 })}</span>`).join("")}<span class="dim">${plural(p.badges.length, "badge")}</span></div>` : ""}
+    <button class="btn primary" id="share-card" type="button">Share player card</button>
+  </div>`;
+}
+
 // trophy cabinet: badges held, the next rung on each ladder, luck and rating
 function cabinet(p) {
   const D = state.data;
@@ -177,6 +205,19 @@ export function member(app, key) {
       <div><div class="k">Best session</div><div class="v ${cls(p.best_game.net)}">${signed(p.best_game.net)}</div><div class="s">${dateLabel(p.best_game.date, { year: false })}</div></div>
     </div>
 
+    <section class="section grid-2">
+      ${playerCard(p)}
+      <div class="panel">
+        <div class="panel-head"><h2>Party rating</h2><a class="link-more" href="#/honours">How it works →</a></div>
+        <div class="mini-stats" style="margin-bottom:14px">
+          <div><span class="k">Now</span><span class="v">${num(p.rating)}</span><span class="s ${cls(p.rating_change)}">${p.rating_change != null ? signed(p.rating_change) + " last session" : ""}</span></div>
+          <div><span class="k">Peak</span><span class="v">${num(p.rating_peak?.rating)}</span><span class="s">${p.rating_peak ? dateLabel(p.rating_peak.date, { year: false }) : ""}</span></div>
+          <div><span class="k">Rank by rating</span><span class="v">#${ratingRank(p)}</span><span class="s">of ${state.data.players.filter(x => x.rating).length}</span></div>
+        </div>
+        <div id="p-rating"></div>
+      </div>
+    </section>
+
     ${cabinet(p)}
 
     <section class="section grid-2">
@@ -220,7 +261,7 @@ export function member(app, key) {
         <p class="note" style="margin-bottom:12px">Chips won from and lost to each member. In a pot with several winners, each loser's chips are split by how much each winner won.</p>
         <div style="display:grid;gap:10px;margin-bottom:14px">
           ${victim ? `<div class="tag" style="justify-content:space-between;padding:10px 12px;font-size:13px"><span>Best customer</span>${personLink(victim.key, 22)}<span class="pos">${signed(victim.net)}</span></div>` : ""}
-          ${nemesis ? `<div class="tag" style="justify-content:space-between;padding:10px 12px;font-size:13px"><span>Nemesis</span>${personLink(nemesis.key, 22)}<span class="neg">${signed(nemesis.net)}</span></div>` : ""}
+          ${nemesis ? `<div class="tag" style="justify-content:space-between;padding:10px 12px;font-size:13px"><span>Nemesis</span>${personLink(nemesis.key, 22)}<span class="neg">${signed(Math.round(nemesis.net))}</span></div>` : ""}
         </div>
         <div id="p-rivals"></div>
       </div>
@@ -267,4 +308,14 @@ export function member(app, key) {
     tip: `<div class="tt-title">${dateLabel(g.date)}</div><div class="tt-row"><span class="k">Net</span><span>${signed(g.net)}</span></div><div class="tt-row"><span class="k">Buy-in</span><span>${num(g.buy_in)}</span></div><div class="tt-row"><span class="k">Hands</span><span>${num(g.hands)}</span></div>`,
   })));
   styleScatter(document.getElementById("p-style"), D.players, { highlight: key });
+  document.getElementById("share-card").addEventListener("click", e => shareCard(p, e.currentTarget));
+  if (p.rating_history.length) {
+    const rh = [{ date: null, rating: 1500 }, ...p.rating_history];
+    lines(document.getElementById("p-rating"), {
+      xs: rh.map((_, i) => i), xLabel: "Session", zero: false, height: 220, format: v => num(Math.round(v)),
+      series: [{ key, label: p.name, values: rh.map(h => h.rating), color: "var(--series-1)" }],
+      xTitle: (_, i) => (rh[i].date ? dateLabel(rh[i].date, { year: false }) : "Start (1500)"),
+      onPick: i => { if (rh[i].game_id) location.hash = `#/session/${rh[i].game_id}`; },
+    });
+  }
 }
