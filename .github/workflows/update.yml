@@ -13,6 +13,10 @@ on:
         description: "PokerNow game link (optional: follow this table now)"
         required: false
         default: ""
+      republish:
+        description: "Rebuild and publish the site now (e.g. after a player merge)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write   # push the rebuilt site to this repo
@@ -26,6 +30,8 @@ jobs:
   update:
     runs-on: ubuntu-latest
     timeout-minutes: 350
+    env:
+      TZ: Asia/Kolkata
     steps:
       - name: Check out the site
         uses: actions/checkout@v4
@@ -49,9 +55,10 @@ jobs:
           POKERNOW_COOKIE: ${{ secrets.POKERNOW_COOKIE }}
           GH_TOKEN: ${{ github.token }}
           GAME: ${{ inputs.game }}
+          REPUBLISH: ${{ inputs.republish && '--republish' || '' }}
         run: |
           for repo in . ../site-repo; do
             git -C "$repo" config user.name "poker-janta-party bot"
             git -C "$repo" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           done
-          python scripts/cloud_update.py --site ../site-repo ${GAME:+"$GAME"}
+          python scripts/cloud_update.py --site ../site-repo $REPUBLISH ${GAME:+"$GAME"}
