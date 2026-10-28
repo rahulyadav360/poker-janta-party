@@ -1,7 +1,7 @@
 // Pictures for the group chat, drawn on a canvas: the session recap and a member's player card.
 // Phones share them (with a link); elsewhere they download. The build also renders each session
 // recap to recaps/<game_id>.png (scripts/recaps.py), which link previews show.
-import { state, name, dateLabel, dur, signed, num, signature, rivalsOf, showcase } from "./ui.js";
+import { state, name, dateLabel, dur, signed, num, signature, rivalsOf, showcase } from "./ui.js?v=873c31434b";
 
 const W = 1080, H = 1350;
 const C = { bg: "#0b100e", felt: "#0f3a2b", line: "#2a3a32", ink: "#eef2ec", ink2: "#b0bcb3", muted: "#7b887f",

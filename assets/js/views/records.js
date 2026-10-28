@@ -1,4 +1,4 @@
-import { state, esc, num, signed, name, game, dateLabel, avatar, cards, board, plural } from "../ui.js";
+import { state, esc, num, signed, name, game, dateLabel, avatar, cards, board, plural } from "../ui.js?v=873c31434b";
 
 // Season archive: one card per month, champion (or leader) and what stood out.
 export function seasonCard(s) {

@@ -1,7 +1,7 @@
-import { state, esc, num, signed, cls, plural, dur, name, dateLabel, avatar, personLink, movement, form, board, cards, medal, liveBadge, updatedLabel, unlockItem, badBeatItem, vmark } from "../ui.js";
-import { sparkline } from "../charts.js";
-import { recordCard } from "./records.js";
-import { podium, leaderTable } from "./leaderboard.js";
+import { state, esc, num, signed, cls, plural, dur, name, dateLabel, avatar, personLink, movement, form, board, cards, medal, liveBadge, updatedLabel, unlockItem, badBeatItem, vmark } from "../ui.js?v=873c31434b";
+import { sparkline } from "../charts.js?v=873c31434b";
+import { recordCard } from "./records.js?v=873c31434b";
+import { podium, leaderTable } from "./leaderboard.js?v=873c31434b";
 
 export default function home(app) {
   const D = state.data, G = D.games, P = D.players;

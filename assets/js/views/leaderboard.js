@@ -1,5 +1,5 @@
-import { state, esc, num, signed, cls, pct, plural, name, player, avatar, personLink, movement, form, sortableTable, STAT_HELP, dateLabel, vmark } from "../ui.js";
-import { styleMap, divergingBars } from "../charts.js";
+import { state, esc, num, signed, cls, pct, plural, name, player, avatar, personLink, movement, form, sortableTable, STAT_HELP, dateLabel, vmark } from "../ui.js?v=873c31434b";
+import { styleMap, divergingBars } from "../charts.js?v=873c31434b";
 
 export function podium(top) {
   const order = ["first", "second", "third"];

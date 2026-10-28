@@ -1,15 +1,15 @@
-import { state, esc } from "./ui.js";
-import { hideTip } from "./charts.js";
-import home from "./views/home.js";
-import leaderboard from "./views/leaderboard.js";
-import { sessions, session } from "./views/sessions.js";
-import { members, member } from "./views/members.js";
-import hands from "./views/hands.js";
-import hand from "./views/hand.js";
-import records from "./views/records.js";
-import rivalries from "./views/rivalries.js";
-import honours from "./views/honours.js";
-import join from "./views/join.js";
+import { state, esc } from "./ui.js?v=873c31434b";
+import { hideTip } from "./charts.js?v=873c31434b";
+import home from "./views/home.js?v=873c31434b";
+import leaderboard from "./views/leaderboard.js?v=873c31434b";
+import { sessions, session } from "./views/sessions.js?v=873c31434b";
+import { members, member } from "./views/members.js?v=873c31434b";
+import hands from "./views/hands.js?v=873c31434b";
+import hand from "./views/hand.js?v=873c31434b";
+import records from "./views/records.js?v=873c31434b";
+import rivalries from "./views/rivalries.js?v=873c31434b";
+import honours from "./views/honours.js?v=873c31434b";
+import join from "./views/join.js?v=873c31434b";
 
 const app = document.getElementById("app");
 const ROUTES = {
@@ -93,7 +93,7 @@ fetch(`data/stats.json?t=${Date.now()}`).then(r => {
   state.data = d;
   document.getElementById("private-pill").hidden = !d.private;
   // the banker's book is local only: it exists in the private view (serve_private.py), not on the public site
-  if (d.private) ROUTES.bank = (...a) => import("./views/bank.js").then(m => m.default(...a));
+  if (d.private) ROUTES.bank = (...a) => import("./views/bank.js?v=873c31434b").then(m => m.default(...a));
   showUpdated(d);
   window.addEventListener("hashchange", () => route());
   route();

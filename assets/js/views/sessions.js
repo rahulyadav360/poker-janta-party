@@ -1,8 +1,8 @@
-import { state, esc, num, signed, cls, pct, plural, dur, name, game, dateLabel, timeLabel, avatar, personLink, sortableTable, STAT_HELP, board, cards, liveBadge, updatedLabel, unlockItem, badBeatItem } from "../ui.js";
-import { shareRecap } from "../recap.js";
-import { divergingBars, lines, sparkline } from "../charts.js";
-import { awardCard, sessionCard } from "./home.js";
-import { notFound } from "../main.js";
+import { state, esc, num, signed, cls, pct, plural, dur, name, game, dateLabel, timeLabel, avatar, personLink, sortableTable, STAT_HELP, board, cards, liveBadge, updatedLabel, unlockItem, badBeatItem } from "../ui.js?v=873c31434b";
+import { shareRecap } from "../recap.js?v=873c31434b";
+import { divergingBars, lines, sparkline } from "../charts.js?v=873c31434b";
+import { awardCard, sessionCard } from "./home.js?v=873c31434b";
+import { notFound } from "../main.js?v=873c31434b";
 
 export function sessions(app) {
   const G = state.data.games;
