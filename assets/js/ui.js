@@ -56,8 +56,14 @@ export function avatar(key, size = 36) {
   return `<span class="avatar" style="--av:${tone(key)};--size:${size}px" title="${esc(name(key))}" aria-hidden="true">${esc(mark(key))}</span>`;
 }
 export function personLink(key, size = 28) {
-  return `<a class="person" href="#/member/${encodeURIComponent(key)}">${avatar(key, size)}<span class="nm">${esc(name(key))}</span></a>`;
+  return `<a class="person" href="#/member/${encodeURIComponent(key)}">${avatar(key, size)}<span class="nm">${esc(name(key))}${vmark(key)}</span></a>`;
 }
+
+// verified: plays on a signed-in PokerNow account, so the host assistant seats them automatically
+export const verified = key => !!player(key)?.verified;
+export const vmark = key => verified(key)
+  ? `<span class="vmark" title="Verified: plays signed in to PokerNow" role="img" aria-label="verified"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8"/><path d="M4.6 8.3l2.2 2.2 4.6-4.8"/></svg></span>`
+  : "";
 
 export function movement(p) {
   if (p.new) return `<span class="move new" title="First appearance in the latest session">NEW</span>`;

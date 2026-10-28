@@ -1,4 +1,4 @@
-import { state, esc, num, signed, cls, plural, dur, name, dateLabel, avatar, personLink, movement, form, board, cards, medal, liveBadge, updatedLabel, unlockItem, badBeatItem } from "../ui.js";
+import { state, esc, num, signed, cls, plural, dur, name, dateLabel, avatar, personLink, movement, form, board, cards, medal, liveBadge, updatedLabel, unlockItem, badBeatItem, vmark } from "../ui.js";
 import { sparkline } from "../charts.js";
 import { recordCard } from "./records.js";
 import { podium, leaderTable } from "./leaderboard.js";
@@ -111,7 +111,7 @@ export const awardCard = g => a => `
   <a class="award" href="${a.hand ? `#/hand/${g.game_id}/${a.hand}` : `#/member/${encodeURIComponent(a.key)}`}">
     ${medal(AWARD_MARKS[a.id] || "★")}
     <div><div class="t">${esc(a.title)}</div><div class="b">${esc(a.blurb)}</div></div>
-    <div class="who">${avatar(a.key, 26)}<span class="nm">${esc(name(a.key))}</span></div>
+    <div class="who">${avatar(a.key, 26)}<span class="nm">${esc(name(a.key))}${vmark(a.key)}</span></div>
     <span class="v">${esc(a.value)}</span>
   </a>`;
 const AWARD_MARKS = { cm: "CM", landslide: "LS", votes: "VB", comeback: "CK", fire: "FB", populist: "PP", hawk: "FH",

@@ -2,6 +2,8 @@
 // (the same text as the WhatsApp group description; scripts/host_bot.py does what it says).
 import { esc } from "../ui.js";
 
+const VMARK = `<span class="vmark" role="img" aria-label="verified mark"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8"/><path d="M4.6 8.3l2.2 2.2 4.6-4.8"/></svg></span>`;
+
 const COMMANDS = [
   ["/help", "List of commands"],
   ["/rules", "House rules"],
@@ -28,6 +30,7 @@ export default function join(app) {
         <div class="panel-head"><h2>1. Sign in to PokerNow first</h2></div>
         <p>Create a free account at <a href="https://www.pokernow.com" target="_blank" rel="noopener">pokernow.com</a> and stay signed in on every device you play from.</p>
         <p>Signed-in members are seated automatically. Guests have to wait for the host.</p>
+        <p>Members who play signed in get a ${VMARK} next to their name on this site.</p>
       </section>
       <section class="panel">
         <div class="panel-head"><h2>2. Joining the table</h2></div>

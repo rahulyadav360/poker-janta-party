@@ -1,4 +1,4 @@
-import { state, esc, num, signed, cls, pct, plural, name, player, avatar, personLink, movement, form, sortableTable, STAT_HELP, dateLabel } from "../ui.js";
+import { state, esc, num, signed, cls, pct, plural, name, player, avatar, personLink, movement, form, sortableTable, STAT_HELP, dateLabel, vmark } from "../ui.js";
 import { styleMap, divergingBars } from "../charts.js";
 
 export function podium(top) {
@@ -6,7 +6,7 @@ export function podium(top) {
   return `<div class="podium">${top.map((p, i) => `
     <a class="podium-card ${order[i]}" href="#/member/${encodeURIComponent(p.key)}">
       <span class="place" aria-hidden="true">${i + 1}</span>
-      <div class="who">${avatar(p.key, 48)}<div><div class="nm">${esc(p.name)}</div><div style="margin-top:4px">${movement(p)}</div></div></div>
+      <div class="who">${avatar(p.key, 48)}<div><div class="nm">${esc(p.name)}${vmark(p.key)}</div><div style="margin-top:4px">${movement(p)}</div></div></div>
       <div class="net ${cls(p.net)}">${signed(p.net)}</div>
       <div class="meta"><span>${p.games_played} sessions · ${num(p.stats.hands)} hands</span>${form(p.form)}</div>
     </a>`).join("")}</div>`;

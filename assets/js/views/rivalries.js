@@ -1,4 +1,4 @@
-import { state, esc, num, signed, name, avatar, initials } from "../ui.js";
+import { state, esc, num, signed, name, avatar, initials, vmark } from "../ui.js";
 import { showTip, hideTip } from "../charts.js";
 
 export default function rivalries(app) {
@@ -37,7 +37,7 @@ export default function rivalries(app) {
       <div class="panel-head"><h2>Head-to-head grid</h2><p class="note">Members with 50+ hands. Hover a cell for details.</p></div>
       <div class="table-wrap"><table class="matrix" id="matrix">
         <thead><tr><th class="rowh"></th>${P.map(p => `<th title="${esc(p.name)}">${avatar(p.key, 26)}</th>`).join("")}</tr></thead>
-        <tbody>${P.map(a => `<tr><th class="rowh"><a class="person" href="#/member/${encodeURIComponent(a.key)}">${avatar(a.key, 24)}<span class="nm">${esc(a.name)}</span></a></th>${P.map(b => {
+        <tbody>${P.map(a => `<tr><th class="rowh"><a class="person" href="#/member/${encodeURIComponent(a.key)}">${avatar(a.key, 24)}<span class="nm">${esc(a.name)}${vmark(a.key)}</span></a></th>${P.map(b => {
           if (a.key === b.key) return `<td class="cell self"></td>`;
           const v = net[a.key + "|" + b.key] || 0;
           return `<td class="cell" style="background:${fill(v)}" data-a="${esc(a.key)}" data-b="${esc(b.key)}" data-v="${v}">${v ? (v > 0 ? "+" : "−") + num(Math.abs(Math.round(v))) : "·"}</td>`;

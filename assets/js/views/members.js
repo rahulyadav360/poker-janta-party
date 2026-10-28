@@ -1,4 +1,4 @@
-import { state, esc, num, signed, cls, pct, plural, name, player, dateLabel, avatar, personLink, movement, form, sortableTable, STAT_HELP, cards, board, badge, badgeTitle, badBeatItem, showcase, signature, rivalsOf } from "../ui.js";
+import { state, esc, num, signed, cls, pct, plural, name, player, dateLabel, avatar, personLink, movement, form, sortableTable, STAT_HELP, cards, board, badge, badgeTitle, badBeatItem, showcase, signature, rivalsOf, vmark } from "../ui.js";
 import { shareCard } from "../recap.js";
 import { divergingBars, lines, sparkline } from "../charts.js";
 import { styleScatter, styleTag } from "./leaderboard.js";
@@ -46,7 +46,7 @@ export function members(app) {
     const grid = document.getElementById("m-grid");
     grid.innerHTML = rows.length ? rows.map(p => `
       <a class="member-card" href="#/member/${encodeURIComponent(p.key)}">
-        <div class="top">${avatar(p.key, 44)}<div style="min-width:0"><div class="nm">${esc(p.name)}</div>
+        <div class="top">${avatar(p.key, 44)}<div style="min-width:0"><div class="nm">${esc(p.name)}${vmark(p.key)}</div>
           <div style="display:flex;gap:8px;align-items:center;margin-top:4px"><span class="tag">#${p.rank}</span>${movement(p)}</div></div></div>
         <div class="spark" id="ms-${CSS.escape(p.key)}"></div>
         <div class="nums">
@@ -105,7 +105,7 @@ function playerCard(p) {
   const sig = signature(p), { nemesis, victim } = rivalsOf(p), show = showcase(p);
   return `<div class="player-card">
     <div class="pc-top">${avatar(p.key, 64)}
-      <div style="min-width:0"><div class="pc-name">${esc(p.name)}</div><div class="pc-arch">${esc(p.style.label)}</div></div>
+      <div style="min-width:0"><div class="pc-name">${esc(p.name)}${vmark(p.key)}</div><div class="pc-arch">${esc(p.style.label)}</div></div>
       <div class="pc-rank"><span>#${p.rank}</span><small>rating ${num(p.rating)}</small></div>
     </div>
     <p class="pc-blurb">${esc(p.style.blurb)}</p>
@@ -190,7 +190,7 @@ export function member(app, key) {
     <header class="profile-head">
       ${avatar(key, 76)}
       <div style="min-width:0">
-        <h1>${esc(p.name)}</h1>
+        <h1>${esc(p.name)}${vmark(p.key)}</h1>
         <div class="sub">${styleTag(p)}${movement(p)}${form(p.form)}
           ${otherNames.length ? `<span class="dim">Also played as ${otherNames.map(esc).join(", ")}</span>` : ""}</div>
       </div>
