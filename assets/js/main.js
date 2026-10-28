@@ -9,14 +9,16 @@ import hand from "./views/hand.js";
 import records from "./views/records.js";
 import rivalries from "./views/rivalries.js";
 import honours from "./views/honours.js";
+import join from "./views/join.js";
 
 const app = document.getElementById("app");
 const ROUTES = {
   "": home, leaderboard, sessions, session, members, member, hands, hand, "hall-of-fame": records, rivalries, honours, badges: honours,
+  "how-to-play": join, rules: join, join,
   // links from the first version of the site
   games: sessions, game: session, players: members, player: member,
 };
-const NAV_OF = { session: "sessions", game: "sessions", member: "members", player: "members", hand: "hands" };
+const NAV_OF = { rules: "how-to-play", join: "how-to-play", session: "sessions", game: "sessions", member: "members", player: "members", hand: "hands" };
 
 let cleanup = null;
 async function route(refresh = false) {
