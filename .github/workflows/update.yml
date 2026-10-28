@@ -1,5 +1,5 @@
-# Finds our PokerNow tables and publishes them: every 10 minutes in the evening (17:30 to 03:30
-# IST), hourly otherwise. A new table you own gets the host assistant straight away (join and
+# Finds our PokerNow tables and publishes them: every 10 minutes while games are played (12:30 to
+# 07:30 IST), hourly otherwise (GitHub may start scheduled runs late or skip some). A new table you own gets the host assistant straight away (join and
 # rebuy requests by the house rules, table chat kept). While a table is being played the site is
 # republished every 5 minutes; an hour after the last hand the game is checked and the final
 # results published. Code and game data live in the private repo rahulyadav360/poker-data.
@@ -9,7 +9,7 @@ name: Update results
 on:
   schedule:
     - cron: "7 * * * *"
-    - cron: "*/10 12-21 * * *"   # UTC: 17:30 to 03:30 IST
+    - cron: "*/10 0-1,7-23 * * *"   # UTC: 12:30 to 07:30 IST (games so far: first hand 13:00-21:00, last up to 06:00)
   workflow_dispatch:
     inputs:
       game:
