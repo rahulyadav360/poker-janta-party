@@ -1,5 +1,6 @@
 # Finds our PokerNow tables and publishes them: every 10 minutes while games are played (12:30 to
-# 07:30 IST), hourly otherwise (GitHub may start scheduled runs late or skip some). A new table you own gets the host assistant straight away (join and
+# 07:30 IST), hourly otherwise (GitHub may start scheduled runs late or skip some, so a run that
+# ends while a table is still being played queues the next one itself). A new table you own gets the host assistant straight away (join and
 # rebuy requests by the house rules, table chat kept). While a table is being played the site is
 # republished every 5 minutes; an hour after the last hand the game is checked and the final
 # results published. Code and game data live in the private repo rahulyadav360/poker-data.
@@ -24,6 +25,7 @@ on:
 permissions:
   contents: write   # push the rebuilt site to this repo
   pages: write      # ask GitHub Pages to rebuild
+  actions: write    # a run queues the next one while a table is still being played
 
 concurrency:
   group: poker-update
