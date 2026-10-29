@@ -61,6 +61,7 @@ jobs:
         working-directory: data
         env:
           POKERNOW_COOKIE: ${{ secrets.POKERNOW_COOKIE }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           GH_TOKEN: ${{ github.token }}
           GAME: ${{ inputs.game }}
           REPUBLISH: ${{ inputs.republish && '--republish' || '' }}
