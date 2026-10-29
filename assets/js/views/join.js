@@ -1,6 +1,6 @@
 // How to play: joining the table, house rules and the table assistant's chat commands
 // (the same text as the WhatsApp group description; scripts/host_bot.py does what it says).
-import { esc } from "../ui.js?v=873c31434b";
+import { esc } from "../ui.js?v=944541d22c";
 
 const VMARK = `<span class="vmark" role="img" aria-label="verified mark"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8"/><path d="M4.6 8.3l2.2 2.2 4.6-4.8"/></svg></span>`;
 

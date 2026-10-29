@@ -647,6 +647,11 @@ a.pot { text-decoration: none; }
   padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
 .modal { width: min(560px, 100%); max-height: 90vh; overflow: auto; box-shadow: var(--shadow); }
 .settle-list { display: grid; gap: 6px; }
+.modal:has(.share-pick) { width: min(860px, 100%); }
+.share-pick { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; margin: 0; min-width: 0; display: grid; gap: 2px; align-content: start; }
+.share-pick legend { font-weight: 600; font-size: 14px; padding: 0 6px; }
+.share-pick .toggle { display: flex; padding: 4px 0; color: var(--ink); }
+.share-pick .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .settle-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 8px; background: var(--raised); font-size: 14px; cursor: pointer; }
 .toast { position: fixed; z-index: 70; left: 50%; bottom: max(24px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
   background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-weight: 600; box-shadow: var(--shadow); }

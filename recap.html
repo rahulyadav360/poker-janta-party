@@ -10,8 +10,8 @@
 </head>
 <body>
 <script type="module">
-  import { state } from "./assets/js/ui.js?v=873c31434b";
-  import { draw } from "./assets/js/recap.js?v=873c31434b";
+  import { state } from "./assets/js/ui.js?v=944541d22c";
+  import { draw } from "./assets/js/recap.js?v=944541d22c";
   const d = await (await fetch(`data/stats.json?t=${Date.now()}`)).json();
   state.data = d;
   const g = d.games.find(x => x.game_id === location.hash.slice(1)) || d.games[0];
