@@ -56,6 +56,8 @@ export function avatar(key, size = 36) {
   return `<span class="avatar" style="--av:${tone(key)};--size:${size}px" title="${esc(name(key))}" aria-hidden="true">${esc(mark(key))}</span>`;
 }
 export function personLink(key, size = 28) {
+  // someone taken off the site (config/removed_players.json) has no page: name only
+  if (!player(key)) return `<span class="person">${avatar(key, size)}<span class="nm">${esc(name(key))}</span></span>`;
   return `<a class="person" href="#/member/${encodeURIComponent(key)}">${avatar(key, size)}<span class="nm">${esc(name(key))}${vmark(key)}</span></a>`;
 }
 

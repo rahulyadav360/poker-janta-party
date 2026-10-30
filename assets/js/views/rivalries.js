@@ -1,5 +1,5 @@
-import { state, esc, num, signed, name, avatar, initials, vmark } from "../ui.js?v=944541d22c";
-import { showTip, hideTip } from "../charts.js?v=944541d22c";
+import { state, esc, num, signed, name, avatar, initials, vmark } from "../ui.js?v=9f32524049";
+import { showTip, hideTip } from "../charts.js?v=9f32524049";
 
 export default function rivalries(app) {
   const D = state.data;

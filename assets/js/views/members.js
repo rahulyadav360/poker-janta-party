@@ -1,8 +1,8 @@
-import { state, esc, num, signed, cls, pct, plural, name, player, dateLabel, avatar, personLink, movement, form, sortableTable, STAT_HELP, cards, board, badge, badgeTitle, badBeatItem, showcase, signature, rivalsOf, vmark } from "../ui.js?v=944541d22c";
-import { shareCard } from "../recap.js?v=944541d22c";
-import { divergingBars, lines, sparkline } from "../charts.js?v=944541d22c";
-import { styleScatter, styleTag } from "./leaderboard.js?v=944541d22c";
-import { notFound } from "../main.js?v=944541d22c";
+import { state, esc, num, signed, cls, pct, plural, name, player, dateLabel, avatar, personLink, movement, form, sortableTable, STAT_HELP, cards, board, badge, badgeTitle, badBeatItem, showcase, signature, rivalsOf, vmark } from "../ui.js?v=9f32524049";
+import { shareCard } from "../recap.js?v=9f32524049";
+import { divergingBars, lines, sparkline } from "../charts.js?v=9f32524049";
+import { styleScatter, styleTag } from "./leaderboard.js?v=9f32524049";
+import { notFound } from "../main.js?v=9f32524049";
 
 const RANKS = "AKQJT98765432";
 

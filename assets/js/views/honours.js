@@ -1,4 +1,4 @@
-import { state, esc, num, signed, cls, plural, name, dateLabel, avatar, personLink, sortableTable, badge, unlockItem, badBeatItem } from "../ui.js?v=944541d22c";
+import { state, esc, num, signed, cls, plural, name, dateLabel, avatar, personLink, sortableTable, badge, unlockItem, badBeatItem } from "../ui.js?v=9f32524049";
 
 // Honours: titles that change hands, the bad beat counter, seasons, ratings and every badge.
 export default function honours(app) {
