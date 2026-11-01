@@ -13,14 +13,35 @@
   <!-- the latest session's recap, drawn by scripts/recaps.py -->
   <meta property="og:image" content="https://pokerjantaparty.com/recaps/latest.png">
   <meta name="twitter:card" content="summary_large_image">
+  <script>
+    try { const t = localStorage.getItem("pjp-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+    // the data download starts first, alongside everything else, not after the scripts (main.js picks
+    // it up). "no-cache": the browser asks whether its copy is current (a tiny 304) instead of
+    // downloading the whole file again
+    window.PJP_STATS = fetch("data/stats.json", { cache: "no-cache" })
+      .then(r => r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)));
+    window.PJP_STATS.catch(() => {});
+  </script>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Unbounded:wght@500;600;700;800&display=swap">
-  <link rel="stylesheet" href="assets/app.css?v=9f32524049">
-  <script>
-    try { const t = localStorage.getItem("pjp-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
-  </script>
+  <link rel="stylesheet" href="assets/app.css?v=a1b93bca15">
+  <!-- every module at once: otherwise the browser finds them one import level at a time -->
+  <link rel="modulepreload" href="assets/js/main.js?v=a1b93bca15">
+  <link rel="modulepreload" href="assets/js/ui.js?v=a1b93bca15">
+  <link rel="modulepreload" href="assets/js/charts.js?v=a1b93bca15">
+  <link rel="modulepreload" href="assets/js/recap.js?v=a1b93bca15">
+  <link rel="modulepreload" href="assets/js/views/hand.js?v=a1b93bca15">
+  <link rel="modulepreload" href="assets/js/views/hands.js?v=a1b93bca15">
+  <link rel="modulepreload" href="assets/js/views/home.js?v=a1b93bca15">
+  <link rel="modulepreload" href="assets/js/views/honours.js?v=a1b93bca15">
+  <link rel="modulepreload" href="assets/js/views/join.js?v=a1b93bca15">
+  <link rel="modulepreload" href="assets/js/views/leaderboard.js?v=a1b93bca15">
+  <link rel="modulepreload" href="assets/js/views/members.js?v=a1b93bca15">
+  <link rel="modulepreload" href="assets/js/views/records.js?v=a1b93bca15">
+  <link rel="modulepreload" href="assets/js/views/rivalries.js?v=a1b93bca15">
+  <link rel="modulepreload" href="assets/js/views/sessions.js?v=a1b93bca15">
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -74,6 +95,6 @@
     </div>
   </footer>
   <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
-  <script type="module" src="assets/js/main.js?v=9f32524049"></script>
+  <script type="module" src="assets/js/main.js?v=a1b93bca15"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
-import { state, esc, num, signed, cls, plural, dur, name, dateLabel, avatar, personLink, movement, form, board, cards, medal, liveBadge, updatedLabel, unlockItem, badBeatItem, vmark } from "../ui.js?v=9f32524049";
-import { sparkline } from "../charts.js?v=9f32524049";
-import { recordCard } from "./records.js?v=9f32524049";
-import { podium, leaderTable } from "./leaderboard.js?v=9f32524049";
+import { state, esc, num, signed, cls, plural, dur, name, dateLabel, avatar, personLink, movement, form, board, cards, medal, liveBadge, updatedLabel, unlockItem, badBeatItem, vmark } from "../ui.js?v=a1b93bca15";
+import { sparkline } from "../charts.js?v=a1b93bca15";
+import { recordCard } from "./records.js?v=a1b93bca15";
+import { podium, leaderTable } from "./leaderboard.js?v=a1b93bca15";
 
 export default function home(app) {
   const D = state.data, G = D.games, P = D.players;
@@ -102,8 +102,7 @@ export default function home(app) {
   leaderTable(document.getElementById("home-table"), P.slice(3, 10), { compact: true });
   G.forEach(g => {
     const holder = document.getElementById(`spark-${g.game_id}`);
-    const s = g.timeline.series[g.players[0].key];
-    if (holder && s) sparkline(holder, s.filter(v => v != null));
+    if (holder && g.spark?.length) sparkline(holder, g.spark);
   });
 }
 

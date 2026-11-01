@@ -1,4 +1,4 @@
-import { state, esc, num, signed, name, dateLabel, clock, avatar, board, cards, loadHands, plural } from "../ui.js?v=9f32524049";
+import { state, esc, num, signed, name, dateLabel, clock, avatar, board, cards, loadHands, plural } from "../ui.js?v=a1b93bca15";
 
 const PAGE = 40;
 

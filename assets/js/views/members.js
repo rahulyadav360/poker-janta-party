@@ -1,22 +1,25 @@
-import { state, esc, num, signed, cls, pct, plural, name, player, dateLabel, avatar, personLink, movement, form, sortableTable, STAT_HELP, cards, board, badge, badgeTitle, badBeatItem, showcase, signature, rivalsOf, vmark } from "../ui.js?v=9f32524049";
-import { shareCard } from "../recap.js?v=9f32524049";
-import { divergingBars, lines, sparkline } from "../charts.js?v=9f32524049";
-import { styleScatter, styleTag } from "./leaderboard.js?v=9f32524049";
-import { notFound } from "../main.js?v=9f32524049";
+import { state, esc, num, signed, cls, pct, plural, name, player, dateLabel, avatar, personLink, movement, form, sortableTable, STAT_HELP, cards, board, badge, badgeTitle, badBeatItem, showcase, signature, rivalsOf, vmark, dur, ACTIVE_HELP, loadTimeline } from "../ui.js?v=a1b93bca15";
+import { shareCard } from "../recap.js?v=a1b93bca15";
+import { divergingBars, lines, sparkline } from "../charts.js?v=a1b93bca15";
+import { styleScatter, styleTag } from "./leaderboard.js?v=a1b93bca15";
+import { notFound } from "../main.js?v=a1b93bca15";
 
 const RANKS = "AKQJT98765432";
 
-function cumulative(key) {
+async function cumulative(key) {
   // one running total across all sessions, oldest first, plus where each session starts
   const values = [], markers = [], hands = [];
+  const games = [...state.data.games].reverse().filter(g => g.players.some(p => p.key === key));
+  const timelines = await Promise.all(games.map(g => loadTimeline(g.game_id)));
   let base = 0;
-  for (const g of [...state.data.games].reverse()) {
-    const ser = g.timeline.series[key];
+  for (const [i, g] of games.entries()) {
+    const timeline = timelines[i];
+    const ser = timeline.series[key];
     if (!ser) continue;
     markers.push({ i: values.length, label: dateLabel(g.date, { year: false, weekday: false }) });
     let last = 0;
     ser.forEach((v, i) => {
-      if (v != null) { values.push(+(base + v).toFixed(2)); hands.push({ game: g, n: g.timeline.hands[i] }); last = v; }
+      if (v != null) { values.push(+(base + v).toFixed(2)); hands.push({ game: g, n: timeline.hands[i] }); last = v; }
     });
     base += last;
   }
@@ -58,7 +61,7 @@ export function members(app) {
       </a>`).join("") : `<div class="empty">No member matches “${esc(q)}”.</div>`;
     rows.forEach(p => {
       const el = document.getElementById(`ms-${CSS.escape(p.key)}`);
-      if (el) sparkline(el, cumulative(p.key).values);
+      if (el && p.spark?.length) sparkline(el, p.spark);
     });
   };
   document.getElementById("m-search").addEventListener("input", e => { q = e.target.value.trim().toLowerCase(); draw(); });
@@ -202,6 +205,7 @@ export function member(app, key) {
       <div><div class="k">Win rate</div><div class="v ${cls(s.bb_per_100)}">${signed(s.bb_per_100)}</div><div class="s">bb per 100 hands</div></div>
       <div><div class="k">Hands</div><div class="v">${num(s.hands)}</div><div class="s">${num(s.pots_won)} pots won</div></div>
       <div><div class="k">Buy-ins</div><div class="v">${num(p.buy_in)}</div><div class="s">${plural(p.rebuys, "rebuy")}</div></div>
+      <div title="${esc(ACTIVE_HELP)}"><div class="k">Time played</div><div class="v">${dur(p.active_min || 0)}</div><div class="s">${p.games_played ? `${dur(Math.round((p.active_min || 0) / p.games_played))} a session` : ""}</div></div>
       <div><div class="k">Best session</div><div class="v ${cls(p.best_game.net)}">${signed(p.best_game.net)}</div><div class="s">${dateLabel(p.best_game.date, { year: false })}</div></div>
     </div>
 
@@ -283,13 +287,18 @@ export function member(app, key) {
     <section class="panel section"><div class="panel-head"><h2>Result by session</h2></div><div id="p-games"></div></section>
   `;
 
-  const cum = cumulative(key);
-  lines(document.getElementById("p-line"), {
-    xs: cum.values.map((_, i) => i + 1), series: [{ key, label: p.name, values: cum.values, color: "var(--series-1)" }],
-    height: 280, markers: cum.markers, area: true,
-    xTitle: (_, i) => `${dateLabel(cum.hands[i].game.date, { year: false })} · hand #${cum.hands[i].n}`,
-    onPick: i => { location.hash = `#/hand/${cum.hands[i].game.game_id}/${cum.hands[i].n}`; },
-  });
+  const lineEl = document.getElementById("p-line");
+  lineEl.innerHTML = '<div class="skeleton" style="height:280px"></div>';
+  cumulative(key).then(cum => {
+    if (!document.body.contains(lineEl)) return;   // moved on to another page meanwhile
+    lineEl.innerHTML = "";
+    lines(lineEl, {
+      xs: cum.values.map((_, i) => i + 1), series: [{ key, label: p.name, values: cum.values, color: "var(--series-1)" }],
+      height: 280, markers: cum.markers, area: true,
+      xTitle: (_, i) => `${dateLabel(cum.hands[i].game.date, { year: false })} · hand #${cum.hands[i].n}`,
+      onPick: i => { location.hash = `#/hand/${cum.hands[i].game.game_id}/${cum.hands[i].n}`; },
+    });
+  }).catch(err => { lineEl.innerHTML = `<p class="note">${esc(err.message)}</p>`; });
   sortableTable(document.getElementById("p-rivals"), [
     { key: "who", label: "Member", left: true, fmt: r => personLink(r.key, 22), sort: r => name(r.key).toLowerCase() },
     { key: "won", label: "Won", fmt: r => num(r.won), sort: r => r.won },
@@ -305,7 +314,7 @@ export function member(app, key) {
   ], positions);
   divergingBars(document.getElementById("p-games"), p.games.map(g => ({
     label: dateLabel(g.date, { year: false }), value: g.net, href: `#/session/${g.game_id}`,
-    tip: `<div class="tt-title">${dateLabel(g.date)}</div><div class="tt-row"><span class="k">Net</span><span>${signed(g.net)}</span></div><div class="tt-row"><span class="k">Buy-in</span><span>${num(g.buy_in)}</span></div><div class="tt-row"><span class="k">Hands</span><span>${num(g.hands)}</span></div>`,
+    tip: `<div class="tt-title">${dateLabel(g.date)}</div><div class="tt-row"><span class="k">Net</span><span>${signed(g.net)}</span></div><div class="tt-row"><span class="k">Buy-in</span><span>${num(g.buy_in)}</span></div><div class="tt-row"><span class="k">Hands</span><span>${num(g.hands)}</span></div><div class="tt-row"><span class="k">Played</span><span>${dur(g.active_min || 0)}</span></div>`,
   })));
   styleScatter(document.getElementById("p-style"), D.players, { highlight: key });
   document.getElementById("share-card").addEventListener("click", e => shareCard(p, e.currentTarget));

@@ -1,8 +1,8 @@
-import { state, esc, num, signed, cls, pct, plural, dur, name, game, dateLabel, timeLabel, avatar, personLink, sortableTable, STAT_HELP, board, cards, liveBadge, updatedLabel, unlockItem, badBeatItem } from "../ui.js?v=9f32524049";
-import { shareRecap } from "../recap.js?v=9f32524049";
-import { divergingBars, lines, sparkline } from "../charts.js?v=9f32524049";
-import { awardCard, sessionCard } from "./home.js?v=9f32524049";
-import { notFound } from "../main.js?v=9f32524049";
+import { state, esc, num, signed, cls, pct, plural, dur, name, game, dateLabel, timeLabel, avatar, personLink, sortableTable, STAT_HELP, ACTIVE_HELP, board, cards, liveBadge, updatedLabel, unlockItem, badBeatItem, loadTimeline } from "../ui.js?v=a1b93bca15";
+import { shareRecap } from "../recap.js?v=a1b93bca15";
+import { divergingBars, lines, sparkline } from "../charts.js?v=a1b93bca15";
+import { awardCard, sessionCard } from "./home.js?v=a1b93bca15";
+import { notFound } from "../main.js?v=a1b93bca15";
 
 export function sessions(app) {
   const G = state.data.games;
@@ -20,8 +20,7 @@ export function sessions(app) {
     </section>`;
   G.forEach(g => {
     const holder = document.getElementById(`spark-${g.game_id}`);
-    const s = g.timeline.series[g.players[0].key];
-    if (holder && s) sparkline(holder, s.filter(v => v != null));
+    if (holder && g.spark?.length) sparkline(holder, g.spark);
   });
   sortableTable(document.getElementById("sessions-table"), [
     { key: "date", label: "Date", left: true, fmt: g => `<a href="#/session/${g.game_id}">${dateLabel(g.date)}</a>`, sort: g => g.date },
@@ -87,11 +86,11 @@ export function session(app, id) {
     <section class="panel section">
       <div class="panel-head"><h2>Running chip count</h2><p class="note">Pick up to 3 members to follow. Click anywhere on the chart to replay that hand.</p></div>
       <div class="legend" id="tl-legend"></div>
-      <div id="timeline"></div>
+      <div id="timeline"><div class="skeleton" style="height:320px"></div></div>
     </section>
 
     <section class="section grid-2">
-      <div class="panel"><div class="panel-head"><h2>Ledger</h2><p class="note">Buy-ins with rebuys combined</p></div><div id="ledger"></div></div>
+      <div class="panel"><div class="panel-head"><h2>Ledger</h2><p class="note">Buy-ins with rebuys combined · Played: active time at the table</p></div><div id="ledger"></div></div>
       <div class="panel"><div class="panel-head"><h2>Result by member</h2></div><div id="game-bars"></div></div>
     </section>
 
@@ -113,37 +112,19 @@ export function session(app, id) {
 
   document.getElementById("share-recap").addEventListener("click", e => shareRecap(g, e.currentTarget));
 
-  const keys = Object.keys(g.timeline.series);
-  const finalOf = k => { const v = g.timeline.series[k]; for (let i = v.length - 1; i >= 0; i--) if (v[i] != null) return v[i]; return 0; };
-  keys.sort((a, b) => finalOf(b) - finalOf(a));
-  let selected = [keys[0], keys[keys.length - 1]];
-  const colors = ["var(--series-1)", "var(--series-2)", "var(--series-3)"];
-  const drawTimeline = () => {
-    const colorOf = k => colors[selected.indexOf(k)];
-    document.getElementById("tl-legend").innerHTML = keys.map(k =>
-      `<button class="chip ${selected.includes(k) ? "on" : ""}" data-k="${esc(k)}" aria-pressed="${selected.includes(k)}"><span class="key" style="${selected.includes(k) ? `background:${colorOf(k)}` : ""}"></span>${esc(name(k))}</button>`).join("");
-    document.querySelectorAll("#tl-legend .chip").forEach(b => b.addEventListener("click", () => {
-      const k = b.dataset.k;
-      selected = selected.includes(k) ? selected.filter(x => x !== k) : [...selected, k].slice(-3);
-      drawTimeline();
-    }));
-    const holder = document.getElementById("timeline");
-    holder.innerHTML = "";
-    const inner = document.createElement("div");
-    holder.appendChild(inner);
-    lines(inner, {
-      xs: g.timeline.hands, height: 320,
-      series: keys.map(k => ({ key: k, label: name(k), values: g.timeline.series[k], color: colorOf(k) })),
-      onPick: i => { location.hash = `#/hand/${g.game_id}/${g.timeline.hands[i]}`; },
-    });
-  };
-  drawTimeline();
+  loadTimeline(g.game_id).then(t => {
+    if (document.getElementById("timeline")) drawChipCount(g, t);
+  }).catch(err => {
+    const el = document.getElementById("timeline");
+    if (el) el.innerHTML = `<p class="note">${esc(err.message)}</p>`;
+  });
 
   sortableTable(document.getElementById("ledger"), [
     { key: "name", label: "Member", left: true, fmt: p => personLink(p.key, 24), sort: p => name(p.key).toLowerCase() },
     { key: "buyin", label: "Buy-in", fmt: p => num(p.ledger.buy_in) + (p.ledger.sessions > 1 ? ` <span class="dim">×${p.ledger.sessions}</span>` : ""), sort: p => p.ledger.buy_in },
     { key: "out", label: "Cash-out", fmt: p => num(p.ledger.buy_out + p.ledger.stack), sort: p => p.ledger.buy_out + p.ledger.stack },
     { key: "net", label: "Net", fmt: p => `<strong>${signed(p.ledger.net)}</strong>`, cls: p => cls(p.ledger.net), sort: p => p.ledger.net },
+    { key: "time", label: "Played", title: ACTIVE_HELP, fmt: p => p.active_min ? dur(p.active_min) : "–", sort: p => p.active_min || 0 },
   ], g.players, { sort: { key: "net", dir: -1 } });
 
   divergingBars(document.getElementById("game-bars"), g.players.map(p => ({
@@ -186,3 +167,31 @@ export const potItem = g => p => {
     <a class="btn" href="#/hand/${g.game_id}/${p.hand}" aria-label="Replay hand ${p.hand}">▶ Replay</a>
   </li>`;
 };
+
+function drawChipCount(g, timeline) {
+  const keys = Object.keys(timeline.series);
+  const finalOf = k => { const v = timeline.series[k]; for (let i = v.length - 1; i >= 0; i--) if (v[i] != null) return v[i]; return 0; };
+  keys.sort((a, b) => finalOf(b) - finalOf(a));
+  let selected = [keys[0], keys[keys.length - 1]];
+  const colors = ["var(--series-1)", "var(--series-2)", "var(--series-3)"];
+  const drawTimeline = () => {
+    const colorOf = k => colors[selected.indexOf(k)];
+    document.getElementById("tl-legend").innerHTML = keys.map(k =>
+      `<button class="chip ${selected.includes(k) ? "on" : ""}" data-k="${esc(k)}" aria-pressed="${selected.includes(k)}"><span class="key" style="${selected.includes(k) ? `background:${colorOf(k)}` : ""}"></span>${esc(name(k))}</button>`).join("");
+    document.querySelectorAll("#tl-legend .chip").forEach(b => b.addEventListener("click", () => {
+      const k = b.dataset.k;
+      selected = selected.includes(k) ? selected.filter(x => x !== k) : [...selected, k].slice(-3);
+      drawTimeline();
+    }));
+    const holder = document.getElementById("timeline");
+    holder.innerHTML = "";
+    const inner = document.createElement("div");
+    holder.appendChild(inner);
+    lines(inner, {
+      xs: timeline.hands, height: 320,
+      series: keys.map(k => ({ key: k, label: name(k), values: timeline.series[k], color: colorOf(k) })),
+      onPick: i => { location.hash = `#/hand/${g.game_id}/${timeline.hands[i]}`; },
+    });
+  };
+  drawTimeline();
+}

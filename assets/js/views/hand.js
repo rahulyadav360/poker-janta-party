@@ -1,5 +1,5 @@
-import { state, esc, num, signed, cls, name, game, dateLabel, clock, avatar, personLink, card, cards, backs, loadHands, eqPct } from "../ui.js?v=9f32524049";
-import { notFound } from "../main.js?v=9f32524049";
+import { state, esc, num, signed, cls, name, game, dateLabel, clock, avatar, personLink, card, cards, backs, loadHands, eqPct } from "../ui.js?v=a1b93bca15";
+import { notFound } from "../main.js?v=a1b93bca15";
 
 const STREET = ["Preflop", "Flop", "Turn", "River"];
 const VERB = { sb: "small blind", bb: "big blind", post: "posts", dead: "dead blind", call: "calls", bet: "bets",

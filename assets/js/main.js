@@ -1,15 +1,15 @@
-import { state, esc } from "./ui.js?v=9f32524049";
-import { hideTip } from "./charts.js?v=9f32524049";
-import home from "./views/home.js?v=9f32524049";
-import leaderboard from "./views/leaderboard.js?v=9f32524049";
-import { sessions, session } from "./views/sessions.js?v=9f32524049";
-import { members, member } from "./views/members.js?v=9f32524049";
-import hands from "./views/hands.js?v=9f32524049";
-import hand from "./views/hand.js?v=9f32524049";
-import records from "./views/records.js?v=9f32524049";
-import rivalries from "./views/rivalries.js?v=9f32524049";
-import honours from "./views/honours.js?v=9f32524049";
-import join from "./views/join.js?v=9f32524049";
+import { state, esc } from "./ui.js?v=a1b93bca15";
+import { hideTip } from "./charts.js?v=a1b93bca15";
+import home from "./views/home.js?v=a1b93bca15";
+import leaderboard from "./views/leaderboard.js?v=a1b93bca15";
+import { sessions, session } from "./views/sessions.js?v=a1b93bca15";
+import { members, member } from "./views/members.js?v=a1b93bca15";
+import hands from "./views/hands.js?v=a1b93bca15";
+import hand from "./views/hand.js?v=a1b93bca15";
+import records from "./views/records.js?v=a1b93bca15";
+import rivalries from "./views/rivalries.js?v=a1b93bca15";
+import honours from "./views/honours.js?v=a1b93bca15";
+import join from "./views/join.js?v=a1b93bca15";
 
 const app = document.getElementById("app");
 const ROUTES = {
@@ -52,12 +52,13 @@ function followLive() {
   if (livePoll || !state.data.games.some(g => g.live)) return;
   livePoll = setInterval(async () => {
     try {
-      const r = await fetch(`data/stats.json?t=${Date.now()}`, { cache: "no-store" });
-      if (!r.ok) return;
-      const d = await r.json();
+      // a few bytes every 2 minutes; the full data only when it has changed
+      if (await fetchVersion() === state.data.generated_at) return;
+      const d = await fetchStats();
       if (d.generated_at === state.data.generated_at) return;
       state.data = d;
       state.hands = {};
+      state.timelines = {};
       showUpdated(d);
       const view = location.hash.replace(/^#\/?/, "").split("/")[0];
       if (!["hand", "bank"].includes(view)) route(true);
@@ -85,15 +86,26 @@ function initTheme() {
   });
 }
 
-initTheme();
-fetch(`data/stats.json?t=${Date.now()}`).then(r => {
+// data/version.json is a few bytes, for the live check. stats.json is asked for with "no-cache": the
+// browser checks its copy is current (a 304, no download) and never shows a stale one
+async function fetchVersion() {
+  const r = await fetch(`data/version.json?t=${Date.now()}`, { cache: "no-store" });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return (await r.json()).generated_at;
+}
+async function fetchStats() {
+  const r = await fetch("data/stats.json", { cache: "no-cache" });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   return r.json();
-}).then(d => {
+}
+
+initTheme();
+// index.html starts this download before the scripts arrive (window.PJP_STATS)
+(window.PJP_STATS || fetchStats()).catch(() => fetchStats()).then(d => {
   state.data = d;
   document.getElementById("private-pill").hidden = !d.private;
   // the banker's book is local only: it exists in the private view (serve_private.py), not on the public site
-  if (d.private) ROUTES.bank = (...a) => import("./views/bank.js?v=9f32524049").then(m => m.default(...a));
+  if (d.private) ROUTES.bank = (...a) => import("./views/bank.js?v=a1b93bca15").then(m => m.default(...a));
   showUpdated(d);
   window.addEventListener("hashchange", () => route());
   route();

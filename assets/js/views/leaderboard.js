@@ -1,5 +1,5 @@
-import { state, esc, num, signed, cls, pct, plural, name, player, avatar, personLink, movement, form, sortableTable, STAT_HELP, dateLabel, vmark } from "../ui.js?v=9f32524049";
-import { styleMap, divergingBars } from "../charts.js?v=9f32524049";
+import { state, esc, num, signed, cls, pct, plural, name, player, avatar, personLink, movement, form, sortableTable, STAT_HELP, ACTIVE_HELP, dur, dateLabel, vmark } from "../ui.js?v=a1b93bca15";
+import { styleMap, divergingBars } from "../charts.js?v=a1b93bca15";
 
 export function podium(top) {
   const order = ["first", "second", "third"];
@@ -22,6 +22,7 @@ export function leaderTable(holder, rows, { compact = false } = {}) {
     { key: "hands", label: "Hands", fmt: r => num(r.stats.hands), sort: r => r.stats.hands },
     { key: "bb100", label: "bb/100", title: STAT_HELP.bb100, fmt: r => signed(r.stats.bb_per_100), cls: r => cls(r.stats.bb_per_100), sort: r => r.stats.bb_per_100 },
     ...(compact ? [] : [
+      { key: "time", label: "Time played", title: ACTIVE_HELP, fmt: r => dur(r.active_min || 0), sort: r => r.active_min || 0 },
       { key: "vpip", label: "VPIP", title: STAT_HELP.vpip, fmt: r => pct(r.stats.vpip), sort: r => r.stats.vpip },
       { key: "pfr", label: "PFR", title: STAT_HELP.pfr, fmt: r => pct(r.stats.pfr), sort: r => r.stats.pfr },
       { key: "af", label: "AF", title: STAT_HELP.af, fmt: r => num(r.stats.af), sort: r => r.stats.af },

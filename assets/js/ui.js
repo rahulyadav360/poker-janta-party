@@ -1,5 +1,5 @@
 // Shared state, formatting and small components.
-export const state = { data: null, hands: {} };
+export const state = { data: null, hands: {}, timelines: {} };
 
 export const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 export const num = v => v == null ? "–" : Number(v).toLocaleString("en-IN", { maximumFractionDigits: 1 });
@@ -8,6 +8,7 @@ export const cls = v => v > 0 ? "pos" : v < 0 ? "neg" : "";
 export const pct = v => v == null ? "–" : `${num(v)}%`;
 export const plural = (n, word, many = word + "s") => `${num(n)} ${n === 1 ? word : many}`;
 export const dur = m => `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, "0")}m`;
+export const ACTIVE_HELP = "Time actually playing: from each hand dealt in to the next one, leaving out any break of more than 10 minutes between two of their hands (sitting out is never dealt in)";
 
 export const name = key => state.data.names[key] || key;
 export const player = key => state.data.players.find(p => p.key === key);
@@ -133,10 +134,26 @@ export const STAT_HELP = {
   bb100: "bb/100: big blinds won per 100 hands, the standard win-rate measure.",
 };
 
+// a session's files change only when it does: its own version, so a live game doesn't make
+// browsers fetch every other session again
+const gameVersion = gid => encodeURIComponent(game(gid)?.updated_at || state.data.generated_at);
+
+export async function loadTimeline(gid) {
+  // the running chip count, kept out of stats.json so every page loads faster
+  if (!state.timelines[gid]) {
+    state.timelines[gid] = fetch(`data/timelines/${gid}.json?v=${gameVersion(gid)}`).then(r => {
+      if (!r.ok) throw new Error(`Couldn't load the chip count for this session (HTTP ${r.status}).`);
+      return r.json();
+    });
+    state.timelines[gid].catch(() => { delete state.timelines[gid]; });
+  }
+  return state.timelines[gid];
+}
+
 export async function loadHands(gid) {
   if (!state.hands[gid]) {
     // the version stops a cached copy from hiding new hands while a session is live
-    const r = await fetch(`data/hands/${gid}.json?v=${encodeURIComponent(state.data.generated_at)}`);
+    const r = await fetch(`data/hands/${gid}.json?v=${gameVersion(gid)}`);
     if (!r.ok) throw new Error(`Couldn't load hands for this session (HTTP ${r.status}).`);
     state.hands[gid] = await r.json();
   }
